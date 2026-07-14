@@ -9,7 +9,7 @@ Einfach `index.html` im Browser öffnen (lokal per Doppelklick oder über GitHub
 ## Funktionen
 
 - **Körperkarte**: 12 Einstichstellen (Bauch links/rechts × 3, Oberschenkel links/rechts × 3), farblich nach Ruhezeit markiert.
-- **Automatische Empfehlung**: Für zwei Spritzen werden gleichzeitig zwei Stellen vorgeschlagen — jeweils die am längsten unbenutzte Stelle. Standardmäßig ist der Bauch für Spritze 1 und der Oberschenkel für Spritze 2 reserviert, damit beide Spritzen nicht denselben Bereich beanspruchen (in den Einstellungen abschaltbar oder vertauschbar).
+- **Automatische Empfehlung**: Für zwei Spritzen werden gleichzeitig zwei Stellen vorgeschlagen — jeweils die am längsten unbenutzte Stelle. Standardmäßig ist der Bauch für Spritze 1 und der Oberschenkel für Spritze 2 reserviert, damit beide Spritzen nicht denselben Bereich beanspruchen (in den Einstellungen abschaltbar oder vertauschbar). Zusätzlich wird wenn möglich nach jeder Injektion auch die Körperseite (links/rechts) innerhalb des jeweiligen Bereichs gewechselt.
 - **Protokoll**: Jede Injektion wird mit Datum/Uhrzeit gespeichert und in einer Tabelle aufgelistet.
 - **Überspringen**: Eine vorgeschlagene Stelle kann übersprungen werden — sie gilt dann als "berührt" und rutscht ans Ende der Rotation, ohne als tatsächliche Injektion gezählt zu werden.
 - **Überschreiben/Bearbeiten**: Jede beliebige Stelle kann manuell ausgewählt werden (unabhängig vom Vorschlag), und jeder Protokolleintrag lässt sich nachträglich bearbeiten oder löschen.

@@ -130,6 +130,7 @@ tr:last-child td{border-bottom:none;}
     <div>
       <div class="card">
         <h2>Nächste empfohlene Stellen</h2>
+        <p class="sub" style="margin:-4px 0 12px;">Wechselt wenn möglich auch automatisch die Körperseite</p>
         <div class="rec-row" id="recRow"></div>
       </div>
 
@@ -245,8 +246,32 @@ let state = loadState();
 function defaultState(){
   return {
     history: [],
-    settings: { reserve: true, swap: false, restDays: 14 }
+    settings: { reserve: true, swap: false, restDays: 14 },
+    nextSeq: 1
   };
+}
+
+// Zeitstempel werden auf die Minute gerundet (siehe quickLog/Modal), daher
+// reicht "ts" allein nicht, um bei kurz hintereinander erfassten Einträgen
+// (z.B. beide Spritzen direkt nacheinander) die tatsächliche Reihenfolge zu
+// bestimmen. "seq" ist ein monoton steigender Zähler, der die echte
+// Erfassungsreihenfolge unabhängig von Zeitstempel-Kollisionen festhält.
+function ensureSeq(){
+  let changed = false;
+  let maxSeq = 0;
+  const withSeq = state.history.filter(e=>Number.isFinite(e.seq));
+  const withoutSeq = state.history.filter(e=>!Number.isFinite(e.seq));
+  for(const e of withSeq) if(e.seq > maxSeq) maxSeq = e.seq;
+  if(withoutSeq.length){
+    withoutSeq.sort((a,b)=>a.ts - b.ts);
+    for(const e of withoutSeq){ maxSeq += 1; e.seq = maxSeq; }
+    changed = true;
+  }
+  if(!Number.isFinite(state.nextSeq) || state.nextSeq <= maxSeq){
+    state.nextSeq = maxSeq + 1;
+    changed = true;
+  }
+  return changed;
 }
 
 function loadState(){
@@ -269,12 +294,18 @@ function saveState(){
 
 // --- derived data ---------------------------------------------------
 
-function lastTouch(siteId){
-  let latest = null;
+function latestEntryForSites(siteIds){
+  const ids = siteIds instanceof Set ? siteIds : new Set(siteIds);
+  let best = null;
   for(const e of state.history){
-    if(e.siteId === siteId && (latest===null || e.ts > latest)) latest = e.ts;
+    if(ids.has(e.siteId) && (!best || e.seq > best.seq)) best = e;
   }
-  return latest;
+  return best;
+}
+
+function lastTouch(siteId){
+  const e = latestEntryForSites([siteId]);
+  return e ? e.ts : null;
 }
 
 function daysSince(ts){
@@ -309,9 +340,23 @@ function recommendations(){
   return [sorted[0], sorted[1]];
 }
 
+function lastUsedSide(sites){
+  const e = latestEntryForSites(sites.map(s=>s.id));
+  if(!e) return null;
+  const site = SITES.find(s=>s.id===e.siteId);
+  return site ? site.side : null;
+}
+
 function pickBest(sites){
+  // Bevorzugt die dem letzten Eintrag entgegengesetzte Körperseite, wenn möglich.
+  const avoidSide = lastUsedSide(sites);
+  let candidates = sites;
+  if(avoidSide){
+    const opposite = sites.filter(s=>s.side !== avoidSide);
+    if(opposite.length) candidates = opposite;
+  }
   let best = null, bestDays = -1;
-  for(const s of sites){
+  for(const s of candidates){
     const d = daysSince(lastTouch(s.id));
     if(d > bestDays){ bestDays = d; best = s; }
   }
@@ -415,7 +460,7 @@ function renderRecommendations(){
 
 function quickLog(siteId, type){
   const ts = Math.floor(Date.now() / 60000) * 60000; // minute precision, matches manual entries
-  state.history.push({id: uid(), siteId, type, ts, note: ""});
+  state.history.push({id: uid(), siteId, type, ts, note: "", seq: state.nextSeq++});
   saveState();
   renderAll();
 }
@@ -496,6 +541,7 @@ document.getElementById("fileImport").addEventListener("change", e=>{
       state = Object.assign(defaultState(), parsed, {
         settings: Object.assign(defaultState().settings, parsed.settings||{})
       });
+      ensureSeq();
       saveState();
       renderAll();
     }catch(err){
@@ -582,7 +628,7 @@ document.getElementById("btnSave").addEventListener("click", ()=>{
     entry.ts = ts;
     entry.note = fNote.value.trim();
   } else {
-    state.history.push({id: uid(), siteId: fSite.value, type: modalType, ts, note: fNote.value.trim()});
+    state.history.push({id: uid(), siteId: fSite.value, type: modalType, ts, note: fNote.value.trim(), seq: state.nextSeq++});
   }
   saveState();
   closeModal();
@@ -609,6 +655,7 @@ function renderAll(){
   renderSettings();
 }
 
+if(ensureSeq()) saveState();
 renderAll();
 })();
 </script>
