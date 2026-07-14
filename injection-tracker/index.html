@@ -1,0 +1,616 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Einstichstellen-Tracker</title>
+<style>
+:root{
+  --bg:#f5f6f8; --card:#ffffff; --text:#1b1e24; --muted:#6b7280; --border:#e2e5ea;
+  --accent1:#2f7ed8; --accent2:#8a4fd8;
+  --ok:#2f9e56; --soon:#d3a025; --recent:#d64545; --unused:#3f7fd6;
+  --shadow:0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#14161a; --card:#1d2026; --text:#e7e9ee; --muted:#9aa1ad; --border:#2b2f37;
+    --accent1:#5b9ce6; --accent2:#b48cf0;
+    --ok:#4cbf7a; --soon:#e3b94a; --recent:#e5695f; --unused:#6ba3ec;
+    --shadow:0 1px 3px rgba(0,0,0,.4), 0 1px 2px rgba(0,0,0,.3);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#14161a; --card:#1d2026; --text:#e7e9ee; --muted:#9aa1ad; --border:#2b2f37;
+  --accent1:#5b9ce6; --accent2:#b48cf0;
+  --ok:#4cbf7a; --soon:#e3b94a; --recent:#e5695f; --unused:#6ba3ec;
+}
+:root[data-theme="light"]{
+  --bg:#f5f6f8; --card:#ffffff; --text:#1b1e24; --muted:#6b7280; --border:#e2e5ea;
+  --accent1:#2f7ed8; --accent2:#8a4fd8;
+  --ok:#2f9e56; --soon:#d3a025; --recent:#d64545; --unused:#3f7fd6;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+.wrap{max-width:980px;margin:0 auto;padding:16px 16px 64px;}
+h1{font-size:1.25rem;margin:8px 0 4px;}
+.sub{color:var(--muted);font-size:.85rem;margin:0 0 16px;}
+.grid{display:grid;grid-template-columns:280px 1fr;gap:16px;}
+@media (max-width:760px){.grid{grid-template-columns:1fr;}}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;box-shadow:var(--shadow);}
+.card + .card{margin-top:16px;}
+.card h2{font-size:.95rem;margin:0 0 10px;display:flex;align-items:center;gap:8px;}
+
+/* body diagram */
+.body-card{display:flex;flex-direction:column;align-items:center;}
+svg#bodyMap{width:100%;max-width:280px;height:auto;}
+.site-dot{cursor:pointer;stroke:var(--card);stroke-width:2;transition:r .1s ease;}
+.site-dot:hover{stroke-width:3;}
+.site-label{font-size:9px;fill:var(--muted);pointer-events:none;text-anchor:middle;}
+.rec-ring{fill:none;stroke-width:3;stroke-dasharray:4 3;animation:spin 6s linear infinite;}
+@keyframes spin{to{stroke-dashoffset:-100}}
+.legend{display:flex;flex-wrap:wrap;gap:8px 14px;font-size:.75rem;color:var(--muted);margin-top:10px;justify-content:center;}
+.legend span{display:inline-flex;align-items:center;gap:5px;}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+
+/* recommendation cards */
+.rec-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media (max-width:520px){.rec-row{grid-template-columns:1fr;}}
+.rec-card{border-radius:12px;padding:12px;border:1px solid var(--border);}
+.rec-card .badge{display:inline-block;color:#fff;border-radius:999px;padding:2px 9px;font-size:.72rem;font-weight:600;margin-bottom:6px;}
+.rec-card .site-name{font-weight:600;font-size:1rem;margin:2px 0;}
+.rec-card .since{color:var(--muted);font-size:.82rem;margin-bottom:10px;}
+.rec-card .actions{display:flex;gap:8px;}
+.g1{border-color:var(--accent1)}
+.g1 .badge{background:var(--accent1)}
+.g2{border-color:var(--accent2)}
+.g2 .badge{background:var(--accent2)}
+
+button{font:inherit;cursor:pointer;}
+.btn{border:1px solid var(--border);background:var(--card);color:var(--text);border-radius:9px;padding:7px 12px;font-size:.82rem;}
+.btn:hover{border-color:var(--muted);}
+.btn.primary{background:var(--accent1);border-color:var(--accent1);color:#fff;}
+.btn.primary:hover{filter:brightness(1.05);}
+.btn.ghost{background:transparent;}
+.btn.small{padding:4px 9px;font-size:.75rem;}
+.btn.danger{color:var(--recent);border-color:var(--recent);background:transparent;}
+
+/* settings */
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);font-size:.85rem;}
+.row:last-child{border-bottom:none;}
+.switch{position:relative;width:38px;height:22px;flex:none;}
+.switch input{opacity:0;width:0;height:0;}
+.slider{position:absolute;inset:0;background:var(--border);border-radius:999px;transition:.15s;}
+.slider:before{content:"";position:absolute;width:16px;height:16px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.15s;}
+.switch input:checked + .slider{background:var(--accent1);}
+.switch input:checked + .slider:before{transform:translateX(16px);}
+select,input[type=number]{background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:5px 7px;font-size:.82rem;}
+
+/* history table */
+table{width:100%;border-collapse:collapse;font-size:.82rem;}
+th,td{text-align:left;padding:7px 6px;border-bottom:1px solid var(--border);}
+th{color:var(--muted);font-weight:600;font-size:.72rem;text-transform:uppercase;letter-spacing:.03em;}
+tr:last-child td{border-bottom:none;}
+.type-pill{padding:2px 8px;border-radius:999px;font-size:.72rem;font-weight:600;}
+.type-inj{background:color-mix(in srgb, var(--ok) 18%, transparent);color:var(--ok);}
+.type-skip{background:color-mix(in srgb, var(--muted) 20%, transparent);color:var(--muted);}
+.empty{color:var(--muted);font-size:.85rem;padding:10px 0;text-align:center;}
+.actions-cell{display:flex;gap:6px;}
+.tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+
+/* modal */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;z-index:50;}
+@media (min-width:600px){.overlay{align-items:center;}}
+.modal{background:var(--card);border-radius:16px 16px 0 0;padding:18px;width:100%;max-width:420px;max-height:90vh;overflow:auto;}
+@media (min-width:600px){.modal{border-radius:16px;}}
+.modal h3{margin:0 0 12px;font-size:1rem;}
+.field{margin-bottom:12px;}
+.field label{display:block;font-size:.78rem;color:var(--muted);margin-bottom:4px;}
+.field select,.field input,.field textarea{width:100%;padding:8px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font:inherit;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.seg{display:flex;border:1px solid var(--border);border-radius:9px;overflow:hidden;}
+.seg button{flex:1;padding:8px;background:var(--card);border:none;color:var(--text);font-size:.82rem;}
+.seg button.active{background:var(--accent1);color:#fff;}
+.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>💉 Einstichstellen-Tracker</h1>
+  <p class="sub">Rotation für Bauch &amp; Oberschenkel · empfiehlt automatisch die am längsten unbenutzte Stelle</p>
+
+  <div class="grid">
+    <!-- LEFT: body map -->
+    <div class="card body-card">
+      <h2 style="align-self:flex-start;">Körperkarte</h2>
+      <svg id="bodyMap" viewBox="0 0 300 460"></svg>
+      <div class="legend" id="legend"></div>
+    </div>
+
+    <!-- RIGHT: recommendations, history -->
+    <div>
+      <div class="card">
+        <h2>Nächste empfohlene Stellen</h2>
+        <div class="rec-row" id="recRow"></div>
+      </div>
+
+      <div class="card">
+        <h2>Einstellungen</h2>
+        <div class="row">
+          <div>Bereiche pro Spritze reservieren<br><span style="color:var(--muted);font-size:.72rem;">Bauch → Spritze 1, Oberschenkel → Spritze 2</span></div>
+          <label class="switch"><input type="checkbox" id="cfgReserve"><span class="slider"></span></label>
+        </div>
+        <div class="row">
+          <div>Zuordnung tauschen</div>
+          <label class="switch"><input type="checkbox" id="cfgSwap"><span class="slider"></span></label>
+        </div>
+        <div class="row">
+          <div>Mindest-Ruhezeit pro Stelle (Tage)</div>
+          <input type="number" id="cfgRest" min="1" max="60" style="width:64px;">
+        </div>
+        <div class="tools">
+          <button class="btn small" id="btnExport">Export (JSON)</button>
+          <button class="btn small" id="btnImport">Import (JSON)</button>
+          <input type="file" id="fileImport" accept="application/json" style="display:none;">
+          <button class="btn small danger" id="btnReset">Alle Daten löschen</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Protokoll</h2>
+        <div style="overflow-x:auto;">
+        <table id="historyTable">
+          <thead><tr><th>Datum</th><th>Stelle</th><th>Typ</th><th>Spritze</th><th>Notiz</th><th></th></tr></thead>
+          <tbody id="historyBody"></tbody>
+        </table>
+        </div>
+        <div class="empty" id="historyEmpty" style="display:none;">Noch keine Einträge.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay" style="display:none;">
+  <div class="modal">
+    <h3 id="modalTitle">Injektion eintragen</h3>
+    <div class="field">
+      <label>Einstichstelle</label>
+      <select id="fSite"></select>
+    </div>
+    <div class="field">
+      <label>Typ</label>
+      <div class="seg">
+        <button type="button" id="segInj" class="active">Injektion</button>
+        <button type="button" id="segSkip">Übersprungen</button>
+      </div>
+    </div>
+    <div class="two-col">
+      <div class="field">
+        <label>Datum</label>
+        <input type="date" id="fDate">
+      </div>
+      <div class="field">
+        <label>Uhrzeit</label>
+        <input type="time" id="fTime">
+      </div>
+    </div>
+    <div class="field">
+      <label>Notiz (optional)</label>
+      <input type="text" id="fNote" placeholder="z.B. Medikament, Dosis">
+    </div>
+    <div class="modal-actions">
+      <button class="btn danger" id="btnDeleteEntry" style="display:none;margin-right:auto;">Löschen</button>
+      <button class="btn ghost" id="btnCancel">Abbrechen</button>
+      <button class="btn primary" id="btnSave">Speichern</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+const STORAGE_KEY = "injectionTrackerData_v1";
+
+const SITES = [
+  {id:"bauch-links-oben",    zone:"bauch", side:"links",  pos:"oben",  cx:118, cy:150},
+  {id:"bauch-links-mitte",   zone:"bauch", side:"links",  pos:"mitte", cx:118, cy:180},
+  {id:"bauch-links-unten",   zone:"bauch", side:"links",  pos:"unten", cx:118, cy:210},
+  {id:"bauch-rechts-oben",   zone:"bauch", side:"rechts", pos:"oben",  cx:182, cy:150},
+  {id:"bauch-rechts-mitte",  zone:"bauch", side:"rechts", pos:"mitte", cx:182, cy:180},
+  {id:"bauch-rechts-unten",  zone:"bauch", side:"rechts", pos:"unten", cx:182, cy:210},
+  {id:"oberschenkel-links-oben",   zone:"oberschenkel", side:"links",  pos:"oben",  cx:117, cy:275},
+  {id:"oberschenkel-links-mitte",  zone:"oberschenkel", side:"links",  pos:"mitte", cx:117, cy:325},
+  {id:"oberschenkel-links-unten",  zone:"oberschenkel", side:"links",  pos:"unten", cx:117, cy:375},
+  {id:"oberschenkel-rechts-oben",  zone:"oberschenkel", side:"rechts", pos:"oben",  cx:183, cy:275},
+  {id:"oberschenkel-rechts-mitte", zone:"oberschenkel", side:"rechts", pos:"mitte", cx:183, cy:325},
+  {id:"oberschenkel-rechts-unten", zone:"oberschenkel", side:"rechts", pos:"unten", cx:183, cy:375},
+];
+
+const ZONE_LABEL = {bauch:"Bauch", oberschenkel:"Oberschenkel"};
+const SIDE_LABEL = {links:"links", rechts:"rechts"};
+const POS_LABEL = {oben:"oben", mitte:"mitte", unten:"unten"};
+
+function siteName(id){
+  const s = SITES.find(x=>x.id===id);
+  if(!s) return id;
+  return `${ZONE_LABEL[s.zone]} ${SIDE_LABEL[s.side]} (${POS_LABEL[s.pos]})`;
+}
+
+function uid(){
+  return (crypto.randomUUID ? crypto.randomUUID() : "id-"+Date.now()+"-"+Math.random().toString(16).slice(2));
+}
+
+let state = loadState();
+
+function defaultState(){
+  return {
+    history: [],
+    settings: { reserve: true, swap: false, restDays: 14 }
+  };
+}
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return defaultState();
+    const parsed = JSON.parse(raw);
+    return Object.assign(defaultState(), parsed, {
+      settings: Object.assign(defaultState().settings, parsed.settings||{})
+    });
+  }catch(e){
+    console.warn("Konnte gespeicherte Daten nicht lesen, starte neu.", e);
+    return defaultState();
+  }
+}
+
+function saveState(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+// --- derived data ---------------------------------------------------
+
+function lastTouch(siteId){
+  let latest = null;
+  for(const e of state.history){
+    if(e.siteId === siteId && (latest===null || e.ts > latest)) latest = e.ts;
+  }
+  return latest;
+}
+
+function daysSince(ts){
+  if(ts===null) return Infinity;
+  return (Date.now() - ts) / 86400000;
+}
+
+function siteStatus(siteId){
+  const ts = lastTouch(siteId);
+  const d = daysSince(ts);
+  const rest = state.settings.restDays;
+  if(ts===null) return {level:"unused", days:d, ts};
+  if(d >= rest) return {level:"ok", days:d, ts};
+  if(d >= rest/2) return {level:"soon", days:d, ts};
+  return {level:"recent", days:d, ts};
+}
+
+function groupForZone(zone){
+  const {reserve, swap} = state.settings;
+  if(!reserve) return null; // no fixed group, pooled
+  if(zone==="bauch") return swap ? 2 : 1;
+  return swap ? 1 : 2;
+}
+
+function recommendations(){
+  if(state.settings.reserve){
+    const group1Sites = SITES.filter(s=>groupForZone(s.zone)===1);
+    const group2Sites = SITES.filter(s=>groupForZone(s.zone)===2);
+    return [pickBest(group1Sites), pickBest(group2Sites)];
+  }
+  const sorted = [...SITES].sort((a,b)=>daysSince(lastTouch(b.id)) - daysSince(lastTouch(a.id)));
+  return [sorted[0], sorted[1]];
+}
+
+function pickBest(sites){
+  let best = null, bestDays = -1;
+  for(const s of sites){
+    const d = daysSince(lastTouch(s.id));
+    if(d > bestDays){ bestDays = d; best = s; }
+  }
+  return best;
+}
+
+function relDays(days){
+  if(days===Infinity) return "noch nie benutzt";
+  const d = Math.floor(days);
+  if(d<1) return "heute";
+  if(d===1) return "vor 1 Tag";
+  return `vor ${d} Tagen`;
+}
+
+// --- rendering: body map --------------------------------------------
+
+const svgNS = "http://www.w3.org/2000/svg";
+const bodyMap = document.getElementById("bodyMap");
+
+function drawSilhouette(){
+  const parts = [
+    `<circle cx="150" cy="38" r="26" fill="none" stroke="var(--border)" stroke-width="2"/>`,
+    `<rect x="60" y="88" width="26" height="105" rx="12" fill="none" stroke="var(--border)" stroke-width="2"/>`,
+    `<rect x="214" y="88" width="26" height="105" rx="12" fill="none" stroke="var(--border)" stroke-width="2"/>`,
+    `<rect x="88" y="72" width="124" height="165" rx="22" fill="none" stroke="var(--border)" stroke-width="2"/>`,
+    `<rect x="93" y="237" width="46" height="200" rx="20" fill="none" stroke="var(--border)" stroke-width="2"/>`,
+    `<rect x="161" y="237" width="46" height="200" rx="20" fill="none" stroke="var(--border)" stroke-width="2"/>`,
+  ];
+  return parts.join("");
+}
+
+function statusColor(level){
+  return {unused:"var(--unused)", ok:"var(--ok)", soon:"var(--soon)", recent:"var(--recent)"}[level];
+}
+
+function renderBody(){
+  const recs = recommendations();
+  const recIds = recs.filter(Boolean).map(r=>r.id);
+
+  let svg = drawSilhouette();
+  svg += `<text x="150" y="66" class="site-label" style="font-size:11px;">Bauch</text>`;
+  svg += `<text x="150" y="260" class="site-label" style="font-size:11px;">Oberschenkel</text>`;
+
+  for(const s of SITES){
+    const st = siteStatus(s.id);
+    const color = statusColor(st.level);
+    const isRec1 = recs[0] && recs[0].id === s.id;
+    const isRec2 = recs[1] && recs[1].id === s.id;
+    if(isRec1 || isRec2){
+      const ringColor = isRec1 ? "var(--accent1)" : "var(--accent2)";
+      svg += `<circle cx="${s.cx}" cy="${s.cy}" r="15" class="rec-ring" style="stroke:${ringColor}"/>`;
+    }
+    svg += `<circle class="site-dot" data-site="${s.id}" cx="${s.cx}" cy="${s.cy}" r="9" fill="${color}"><title>${siteName(s.id)} — ${relDays(st.days)}</title></circle>`;
+  }
+  bodyMap.innerHTML = svg;
+  bodyMap.querySelectorAll(".site-dot").forEach(el=>{
+    el.addEventListener("click", ()=> openModal({siteId: el.dataset.site}));
+  });
+}
+
+function renderLegend(){
+  const legend = document.getElementById("legend");
+  legend.innerHTML = `
+    <span><i class="dot" style="background:var(--unused)"></i>Nie benutzt</span>
+    <span><i class="dot" style="background:var(--ok)"></i>Bereit</span>
+    <span><i class="dot" style="background:var(--soon)"></i>Bald wieder bereit</span>
+    <span><i class="dot" style="background:var(--recent)"></i>Kürzlich benutzt</span>
+  `;
+}
+
+// --- rendering: recommendation cards ---------------------------------
+
+function renderRecommendations(){
+  const recs = recommendations();
+  const recRow = document.getElementById("recRow");
+  recRow.innerHTML = "";
+  recs.forEach((site, idx)=>{
+    if(!site) return;
+    const st = siteStatus(site.id);
+    const groupClass = idx===0 ? "g1" : "g2";
+    const div = document.createElement("div");
+    div.className = `rec-card ${groupClass}`;
+    div.innerHTML = `
+      <span class="badge">Spritze ${idx+1}</span>
+      <div class="site-name">${siteName(site.id)}</div>
+      <div class="since">${relDays(st.days)}</div>
+      <div class="actions">
+        <button class="btn primary small" data-act="log">Injektion eintragen</button>
+        <button class="btn small" data-act="skip">Überspringen</button>
+      </div>
+    `;
+    div.querySelector('[data-act="log"]').addEventListener("click", ()=>{
+      quickLog(site.id, "injektion");
+    });
+    div.querySelector('[data-act="skip"]').addEventListener("click", ()=>{
+      quickLog(site.id, "uebersprungen");
+    });
+    recRow.appendChild(div);
+  });
+}
+
+function quickLog(siteId, type){
+  const ts = Math.floor(Date.now() / 60000) * 60000; // minute precision, matches manual entries
+  state.history.push({id: uid(), siteId, type, ts, note: ""});
+  saveState();
+  renderAll();
+}
+
+// --- rendering: history table -----------------------------------------
+
+function renderHistory(){
+  const body = document.getElementById("historyBody");
+  const empty = document.getElementById("historyEmpty");
+  const rows = [...state.history].sort((a,b)=>b.ts - a.ts);
+  body.innerHTML = "";
+  empty.style.display = rows.length ? "none" : "block";
+
+  for(const e of rows){
+    const site = SITES.find(s=>s.id===e.siteId);
+    const grp = site ? groupForZone(site.zone) : null;
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${new Date(e.ts).toLocaleString("de-DE",{day:"2-digit",month:"2-digit",year:"2-digit",hour:"2-digit",minute:"2-digit"})}</td>
+      <td>${siteName(e.siteId)}</td>
+      <td><span class="type-pill ${e.type==='injektion'?'type-inj':'type-skip'}">${e.type==='injektion'?'Injektion':'Übersprungen'}</span></td>
+      <td>${grp ? "Spritze "+grp : "–"}</td>
+      <td>${e.note ? escapeHtml(e.note) : ""}</td>
+      <td class="actions-cell"><button class="btn small" data-act="edit">Bearbeiten</button></td>
+    `;
+    tr.querySelector('[data-act="edit"]').addEventListener("click", ()=> openModal({entryId: e.id}));
+    body.appendChild(tr);
+  }
+}
+
+function escapeHtml(s){
+  const d = document.createElement("div");
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+// --- settings ------------------------------------------------------
+
+function renderSettings(){
+  document.getElementById("cfgReserve").checked = state.settings.reserve;
+  document.getElementById("cfgSwap").checked = state.settings.swap;
+  document.getElementById("cfgRest").value = state.settings.restDays;
+}
+
+document.getElementById("cfgReserve").addEventListener("change", e=>{
+  state.settings.reserve = e.target.checked; saveState(); renderAll();
+});
+document.getElementById("cfgSwap").addEventListener("change", e=>{
+  state.settings.swap = e.target.checked; saveState(); renderAll();
+});
+document.getElementById("cfgRest").addEventListener("change", e=>{
+  const v = parseInt(e.target.value, 10);
+  state.settings.restDays = (Number.isFinite(v) && v>0) ? v : 14;
+  saveState(); renderAll();
+});
+
+document.getElementById("btnExport").addEventListener("click", ()=>{
+  const blob = new Blob([JSON.stringify(state, null, 2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `einstichstellen-protokoll-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+document.getElementById("btnImport").addEventListener("click", ()=>{
+  document.getElementById("fileImport").click();
+});
+document.getElementById("fileImport").addEventListener("change", e=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try{
+      const parsed = JSON.parse(reader.result);
+      if(!Array.isArray(parsed.history)) throw new Error("Ungültiges Format");
+      state = Object.assign(defaultState(), parsed, {
+        settings: Object.assign(defaultState().settings, parsed.settings||{})
+      });
+      saveState();
+      renderAll();
+    }catch(err){
+      alert("Import fehlgeschlagen: " + err.message);
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = "";
+});
+
+document.getElementById("btnReset").addEventListener("click", ()=>{
+  if(confirm("Wirklich alle Protokoll-Einträge und Einstellungen löschen? Dies kann nicht rückgängig gemacht werden.")){
+    state = defaultState();
+    saveState();
+    renderAll();
+  }
+});
+
+// --- modal (log / edit / override) ------------------------------------
+
+const overlay = document.getElementById("overlay");
+const fSite = document.getElementById("fSite");
+const fDate = document.getElementById("fDate");
+const fTime = document.getElementById("fTime");
+const fNote = document.getElementById("fNote");
+const segInj = document.getElementById("segInj");
+const segSkip = document.getElementById("segSkip");
+const btnDeleteEntry = document.getElementById("btnDeleteEntry");
+let modalType = "injektion";
+let editingEntryId = null;
+
+fSite.innerHTML = SITES.map(s=>`<option value="${s.id}">${siteName(s.id)}</option>`).join("");
+
+function setModalType(t){
+  modalType = t;
+  segInj.classList.toggle("active", t==="injektion");
+  segSkip.classList.toggle("active", t==="uebersprungen");
+}
+segInj.addEventListener("click", ()=>setModalType("injektion"));
+segSkip.addEventListener("click", ()=>setModalType("uebersprungen"));
+
+function openModal({siteId, entryId}={}){
+  editingEntryId = entryId || null;
+  let entry = null;
+  if(editingEntryId){
+    entry = state.history.find(e=>e.id===editingEntryId);
+  }
+  document.getElementById("modalTitle").textContent = editingEntryId ? "Eintrag bearbeiten" : "Einstichstelle protokollieren";
+  const now = entry ? new Date(entry.ts) : new Date();
+  fSite.value = entry ? entry.siteId : (siteId || SITES[0].id);
+  setModalType(entry ? entry.type : "injektion");
+  fDate.value = toDateInput(now);
+  fTime.value = toTimeInput(now);
+  fNote.value = entry ? (entry.note||"") : "";
+  btnDeleteEntry.style.display = editingEntryId ? "inline-block" : "none";
+  overlay.style.display = "flex";
+}
+
+function toDateInput(d){
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+function toTimeInput(d){
+  return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
+}
+
+function closeModal(){
+  overlay.style.display = "none";
+  editingEntryId = null;
+}
+
+document.getElementById("btnCancel").addEventListener("click", closeModal);
+overlay.addEventListener("click", e=>{ if(e.target===overlay) closeModal(); });
+
+document.getElementById("btnSave").addEventListener("click", ()=>{
+  const [y,m,d] = fDate.value.split("-").map(Number);
+  const [hh,mm] = fTime.value.split(":").map(Number);
+  const ts = new Date(y, m-1, d, hh, mm).getTime();
+  if(!Number.isFinite(ts)){ alert("Bitte gültiges Datum/Uhrzeit angeben."); return; }
+
+  if(editingEntryId){
+    const entry = state.history.find(e=>e.id===editingEntryId);
+    entry.siteId = fSite.value;
+    entry.type = modalType;
+    entry.ts = ts;
+    entry.note = fNote.value.trim();
+  } else {
+    state.history.push({id: uid(), siteId: fSite.value, type: modalType, ts, note: fNote.value.trim()});
+  }
+  saveState();
+  closeModal();
+  renderAll();
+});
+
+btnDeleteEntry.addEventListener("click", ()=>{
+  if(!editingEntryId) return;
+  if(confirm("Diesen Eintrag löschen?")){
+    state.history = state.history.filter(e=>e.id!==editingEntryId);
+    saveState();
+    closeModal();
+    renderAll();
+  }
+});
+
+// --- init ------------------------------------------------------------
+
+function renderAll(){
+  renderBody();
+  renderLegend();
+  renderRecommendations();
+  renderHistory();
+  renderSettings();
+}
+
+renderAll();
+})();
+</script>
+</body>
+</html>
