@@ -7,45 +7,51 @@
 <style>
 :root{
   --bg:#f5f6f8; --card:#ffffff; --text:#1b1e24; --muted:#6b7280; --border:#e2e5ea;
-  --accent1:#2f7ed8; --accent2:#8a4fd8;
-  --ok:#2f9e56; --soon:#d3a025; --recent:#d64545; --unused:#3f7fd6;
+  --accent1:#2f7ed8; --accent2:#8a4fd8; --accent3:#c2792f;
+  --ok:#2f9e56; --soon:#d3a025; --recent:#d64545; --unused:#3f7fd6; --disabled:#9aa1ad;
   --shadow:0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
 }
 @media (prefers-color-scheme: dark){
   :root{
     --bg:#14161a; --card:#1d2026; --text:#e7e9ee; --muted:#9aa1ad; --border:#2b2f37;
-    --accent1:#5b9ce6; --accent2:#b48cf0;
-    --ok:#4cbf7a; --soon:#e3b94a; --recent:#e5695f; --unused:#6ba3ec;
+    --accent1:#5b9ce6; --accent2:#b48cf0; --accent3:#e0a15c;
+    --ok:#4cbf7a; --soon:#e3b94a; --recent:#e5695f; --unused:#6ba3ec; --disabled:#6b7280;
     --shadow:0 1px 3px rgba(0,0,0,.4), 0 1px 2px rgba(0,0,0,.3);
   }
 }
 :root[data-theme="dark"]{
   --bg:#14161a; --card:#1d2026; --text:#e7e9ee; --muted:#9aa1ad; --border:#2b2f37;
-  --accent1:#5b9ce6; --accent2:#b48cf0;
-  --ok:#4cbf7a; --soon:#e3b94a; --recent:#e5695f; --unused:#6ba3ec;
+  --accent1:#5b9ce6; --accent2:#b48cf0; --accent3:#e0a15c;
+  --ok:#4cbf7a; --soon:#e3b94a; --recent:#e5695f; --unused:#6ba3ec; --disabled:#6b7280;
 }
 :root[data-theme="light"]{
   --bg:#f5f6f8; --card:#ffffff; --text:#1b1e24; --muted:#6b7280; --border:#e2e5ea;
-  --accent1:#2f7ed8; --accent2:#8a4fd8;
-  --ok:#2f9e56; --soon:#d3a025; --recent:#d64545; --unused:#3f7fd6;
+  --accent1:#2f7ed8; --accent2:#8a4fd8; --accent3:#c2792f;
+  --ok:#2f9e56; --soon:#d3a025; --recent:#d64545; --unused:#3f7fd6; --disabled:#9aa1ad;
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
-.wrap{max-width:980px;margin:0 auto;padding:16px 16px 64px;}
+.wrap{max-width:1040px;margin:0 auto;padding:16px 16px 64px;}
 h1{font-size:1.25rem;margin:8px 0 4px;}
 .sub{color:var(--muted);font-size:.85rem;margin:0 0 16px;}
-.grid{display:grid;grid-template-columns:280px 1fr;gap:16px;}
+.grid{display:grid;grid-template-columns:300px 1fr;gap:16px;align-items:start;}
 @media (max-width:760px){.grid{grid-template-columns:1fr;}}
 .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;box-shadow:var(--shadow);}
 .card + .card{margin-top:16px;}
 .card h2{font-size:.95rem;margin:0 0 10px;display:flex;align-items:center;gap:8px;}
+.info-card{font-size:.8rem;line-height:1.5;color:var(--muted);}
+.info-card b{color:var(--text);}
+.info-card ul{margin:6px 0;padding-left:18px;}
 
 /* body diagram */
 .body-card{display:flex;flex-direction:column;align-items:center;}
-svg#bodyMap{width:100%;max-width:280px;height:auto;}
+svg#bodyMap{width:100%;max-width:300px;height:auto;}
+.body-outline{fill:none;stroke:var(--border);stroke-width:2.5;stroke-linejoin:round;}
+.zone-hint{fill:none;stroke:var(--muted);stroke-width:1.4;stroke-dasharray:3 4;opacity:.55;}
 .site-dot{cursor:pointer;stroke:var(--card);stroke-width:2;transition:r .1s ease;}
 .site-dot:hover{stroke-width:3;}
-.site-label{font-size:9px;fill:var(--muted);pointer-events:none;text-anchor:middle;}
+.site-dot.site-disabled{cursor:pointer;}
+.site-label{font-size:9.5px;fill:var(--muted);pointer-events:none;text-anchor:middle;}
 .rec-ring{fill:none;stroke-width:3;stroke-dasharray:4 3;animation:spin 6s linear infinite;}
 @keyframes spin{to{stroke-dashoffset:-100}}
 .legend{display:flex;flex-wrap:wrap;gap:8px 14px;font-size:.75rem;color:var(--muted);margin-top:10px;justify-content:center;}
@@ -59,7 +65,8 @@ svg#bodyMap{width:100%;max-width:280px;height:auto;}
 .rec-card .badge{display:inline-block;color:#fff;border-radius:999px;padding:2px 9px;font-size:.72rem;font-weight:600;margin-bottom:6px;}
 .rec-card .site-name{font-weight:600;font-size:1rem;margin:2px 0;}
 .rec-card .since{color:var(--muted);font-size:.82rem;margin-bottom:10px;}
-.rec-card .actions{display:flex;gap:8px;}
+.rec-card .actions{display:flex;gap:8px;flex-wrap:wrap;}
+.rec-card .warn{color:var(--recent);font-size:.76rem;margin:6px 0;line-height:1.4;}
 .g1{border-color:var(--accent1)}
 .g1 .badge{background:var(--accent1)}
 .g2{border-color:var(--accent2)}
@@ -68,8 +75,11 @@ svg#bodyMap{width:100%;max-width:280px;height:auto;}
 button{font:inherit;cursor:pointer;}
 .btn{border:1px solid var(--border);background:var(--card);color:var(--text);border-radius:9px;padding:7px 12px;font-size:.82rem;}
 .btn:hover{border-color:var(--muted);}
+.btn:disabled{opacity:.45;cursor:not-allowed;}
+.btn:disabled:hover{border-color:var(--border);}
 .btn.primary{background:var(--accent1);border-color:var(--accent1);color:#fff;}
 .btn.primary:hover{filter:brightness(1.05);}
+.btn.primary:disabled{background:var(--muted);border-color:var(--muted);}
 .btn.ghost{background:transparent;}
 .btn.small{padding:4px 9px;font-size:.75rem;}
 .btn.danger{color:var(--recent);border-color:var(--recent);background:transparent;}
@@ -83,19 +93,35 @@ button{font:inherit;cursor:pointer;}
 .slider:before{content:"";position:absolute;width:16px;height:16px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.15s;}
 .switch input:checked + .slider{background:var(--accent1);}
 .switch input:checked + .slider:before{transform:translateX(16px);}
-select,input[type=number]{background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:5px 7px;font-size:.82rem;}
+select,input[type=number],input[type=text]{background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:5px 7px;font-size:.82rem;}
+.syringe-cfg{border:1px solid var(--border);border-radius:10px;padding:10px;margin-top:10px;}
+.syringe-cfg .cfg-title{font-weight:600;font-size:.85rem;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;}
+.cfg-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.cfg-grid .field-inline{display:flex;flex-direction:column;gap:3px;}
+.cfg-grid label{font-size:.72rem;color:var(--muted);}
+.cfg-grid select, .cfg-grid input{width:100%;}
 
 /* history table */
 table{width:100%;border-collapse:collapse;font-size:.82rem;}
 th,td{text-align:left;padding:7px 6px;border-bottom:1px solid var(--border);}
 th{color:var(--muted);font-weight:600;font-size:.72rem;text-transform:uppercase;letter-spacing:.03em;}
 tr:last-child td{border-bottom:none;}
-.type-pill{padding:2px 8px;border-radius:999px;font-size:.72rem;font-weight:600;}
+.type-pill{padding:2px 8px;border-radius:999px;font-size:.72rem;font-weight:600;white-space:nowrap;}
 .type-inj{background:color-mix(in srgb, var(--ok) 18%, transparent);color:var(--ok);}
 .type-skip{background:color-mix(in srgb, var(--muted) 20%, transparent);color:var(--muted);}
 .empty{color:var(--muted);font-size:.85rem;padding:10px 0;text-align:center;}
 .actions-cell{display:flex;gap:6px;}
 .tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+
+/* medication */
+.med-item{border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px;}
+.med-item:last-child{margin-bottom:0;}
+.med-item .med-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
+.med-item .med-name{font-weight:600;font-size:.95rem;}
+.med-item .med-meta{color:var(--muted);font-size:.78rem;margin-top:2px;}
+.med-item .med-status{font-size:.82rem;margin-top:8px;}
+.med-item .warn{color:var(--recent);font-size:.76rem;margin-top:4px;}
+.med-item .actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
 
 /* modal */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;z-index:50;}
@@ -111,22 +137,32 @@ tr:last-child td{border-bottom:none;}
 .seg button{flex:1;padding:8px;background:var(--card);border:none;color:var(--text);font-size:.82rem;}
 .seg button.active{background:var(--accent1);color:#fff;}
 .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px;}
+.modal-warn{color:var(--recent);font-size:.78rem;background:color-mix(in srgb, var(--recent) 12%, transparent);border-radius:8px;padding:8px 10px;margin-bottom:12px;line-height:1.4;}
+.radio-row{display:flex;align-items:center;gap:6px;margin-bottom:5px;font-size:.85rem;}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>💉 Einstichstellen-Tracker</h1>
+  <h1>💉 Einstichstellen- &amp; Medikamenten-Tracker</h1>
   <p class="sub">Rotation für Bauch &amp; Oberschenkel · empfiehlt automatisch die am längsten unbenutzte Stelle</p>
+
+  <div class="card info-card">
+    <h2 style="color:var(--text);">ℹ️ Allgemeine Hinweise zu Injektionsstellen</h2>
+    <div><b>Bauch:</b> ca. 5&nbsp;cm Abstand rund um den Bauchnabel einhalten, nicht oberhalb der untersten Rippe spritzen.</div>
+    <div style="margin-top:4px;"><b>Oberschenkel:</b> Vorderseite/Außenseite nutzen, ca. 5&nbsp;cm Sicherheitsabstand zu Knie und Leiste einhalten.</div>
+    <div style="margin-top:4px;"><b>Rotation:</b> bei jeder Injektion die Stelle wechseln (mind. 1–2&nbsp;cm Abstand zur letzten Einstichstelle), um Hautreizungen und Verhärtungen vorzubeugen.</div>
+    <div style="margin-top:6px;font-size:.75rem;">Allgemeine Angaben aus Packungsbeilagen/Fachinformationen gängiger Fertigspritzen (z.&nbsp;B. Methotrexat, Adalimumab-Präparate). Ersetzt keine ärztliche Beratung oder die Anleitung deines konkreten Präparats.</div>
+  </div>
 
   <div class="grid">
     <!-- LEFT: body map -->
     <div class="card body-card">
       <h2 style="align-self:flex-start;">Körperkarte</h2>
-      <svg id="bodyMap" viewBox="0 0 300 460"></svg>
+      <svg id="bodyMap" viewBox="0 0 300 560"></svg>
       <div class="legend" id="legend"></div>
     </div>
 
-    <!-- RIGHT: recommendations, history -->
+    <!-- RIGHT: recommendations, medication, history -->
     <div>
       <div class="card">
         <h2>Nächste empfohlene Stellen</h2>
@@ -134,18 +170,35 @@ tr:last-child td{border-bottom:none;}
         <div class="rec-row" id="recRow"></div>
       </div>
 
+      <div class="card" id="medCard" style="display:none;">
+        <h2>Medikamenten-Tracker</h2>
+        <div id="medList"></div>
+        <div class="tools">
+          <button class="btn small" id="btnAddMed">+ Medikament hinzufügen</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Was möchtest du verwalten?</h2>
+        <div class="row">
+          <div>Spritze 1</div>
+          <label class="switch"><input type="checkbox" id="cfgSyr1Enabled"><span class="slider"></span></label>
+        </div>
+        <div class="row">
+          <div>Spritze 2</div>
+          <label class="switch"><input type="checkbox" id="cfgSyr2Enabled"><span class="slider"></span></label>
+        </div>
+        <div class="row">
+          <div>Medikamenten-Tracker (z.&nbsp;B. Folsäure)</div>
+          <label class="switch"><input type="checkbox" id="cfgMedEnabled"><span class="slider"></span></label>
+        </div>
+      </div>
+
       <div class="card">
         <h2>Einstellungen</h2>
-        <div class="row">
-          <div>Bereiche pro Spritze reservieren<br><span style="color:var(--muted);font-size:.72rem;">Bauch → Spritze 1, Oberschenkel → Spritze 2</span></div>
-          <label class="switch"><input type="checkbox" id="cfgReserve"><span class="slider"></span></label>
-        </div>
-        <div class="row">
-          <div>Zuordnung tauschen</div>
-          <label class="switch"><input type="checkbox" id="cfgSwap"><span class="slider"></span></label>
-        </div>
-        <div class="row">
-          <div>Mindest-Ruhezeit pro Stelle (Tage)</div>
+        <div id="syringeCfgList"></div>
+        <div class="row" style="margin-top:4px;">
+          <div>Mindest-Ruhezeit pro Einstichstelle (Tage)<br><span style="color:var(--muted);font-size:.72rem;">steuert die Farbe/Rotation der Körperkarte</span></div>
           <input type="number" id="cfgRest" min="1" max="60" style="width:64px;">
         </div>
         <div class="tools">
@@ -154,6 +207,12 @@ tr:last-child td{border-bottom:none;}
           <input type="file" id="fileImport" accept="application/json" style="display:none;">
           <button class="btn small danger" id="btnReset">Alle Daten löschen</button>
         </div>
+      </div>
+
+      <div class="card">
+        <h2>Einstichstellen verwalten</h2>
+        <p class="sub" style="margin:-4px 0 10px;">Dauerhaft deaktivierte Stellen werden nie mehr empfohlen.</p>
+        <div id="siteManageList"></div>
       </div>
 
       <div class="card">
@@ -166,16 +225,35 @@ tr:last-child td{border-bottom:none;}
         </div>
         <div class="empty" id="historyEmpty" style="display:none;">Noch keine Einträge.</div>
       </div>
+
+      <div class="card" id="medHistoryCard" style="display:none;">
+        <h2>Medikamenten-Protokoll</h2>
+        <div style="overflow-x:auto;">
+        <table id="medHistoryTable">
+          <thead><tr><th>Datum</th><th>Medikament</th><th>Notiz</th><th></th></tr></thead>
+          <tbody id="medHistoryBody"></tbody>
+        </table>
+        </div>
+        <div class="empty" id="medHistoryEmpty" style="display:none;">Noch keine Einträge.</div>
+      </div>
     </div>
   </div>
 </div>
 
+<!-- injection log / edit modal -->
 <div class="overlay" id="overlay" style="display:none;">
   <div class="modal">
     <h3 id="modalTitle">Injektion eintragen</h3>
     <div class="field">
       <label>Einstichstelle</label>
       <select id="fSite"></select>
+    </div>
+    <div class="tools" style="margin:-6px 0 12px;">
+      <button class="btn small ghost" id="btnToggleDisable" type="button"></button>
+    </div>
+    <div class="field">
+      <label>Zugehörige Spritze</label>
+      <div id="fGroupOptions"></div>
     </div>
     <div class="field">
       <label>Typ</label>
@@ -196,8 +274,9 @@ tr:last-child td{border-bottom:none;}
     </div>
     <div class="field">
       <label>Notiz (optional)</label>
-      <input type="text" id="fNote" placeholder="z.B. Medikament, Dosis">
+      <input type="text" id="fNote" placeholder="z.B. Dosis">
     </div>
+    <div class="modal-warn" id="gateWarning" style="display:none;"></div>
     <div class="modal-actions">
       <button class="btn danger" id="btnDeleteEntry" style="display:none;margin-right:auto;">Löschen</button>
       <button class="btn ghost" id="btnCancel">Abbrechen</button>
@@ -206,28 +285,92 @@ tr:last-child td{border-bottom:none;}
   </div>
 </div>
 
+<!-- medication config modal (add/edit a medication definition) -->
+<div class="overlay" id="medConfigOverlay" style="display:none;">
+  <div class="modal">
+    <h3 id="medConfigTitle">Medikament hinzufügen</h3>
+    <div class="field">
+      <label>Name</label>
+      <input type="text" id="mcName" placeholder="z.B. Folsäure">
+    </div>
+    <div class="field">
+      <label>Mindestabstand zwischen Einnahmen (Tage)</label>
+      <input type="number" id="mcInterval" min="1" max="60" style="width:100px;">
+    </div>
+    <div class="field">
+      <label>Zeitpunkt</label>
+      <select id="mcMode">
+        <option value="interval">Fester Abstand (s.o.)</option>
+        <option value="afterSyringe">X Tage nach einer Spritze</option>
+      </select>
+    </div>
+    <div class="two-col" id="mcAfterFields" style="display:none;">
+      <div class="field">
+        <label>Nach welcher Spritze</label>
+        <select id="mcAfterSyringe"></select>
+      </div>
+      <div class="field">
+        <label>Tage danach</label>
+        <input type="number" id="mcOffset" min="0" max="30">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn danger" id="mcDelete" style="display:none;margin-right:auto;">Löschen</button>
+      <button class="btn ghost" id="mcCancel">Abbrechen</button>
+      <button class="btn primary" id="mcSave">Speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- medication intake entry modal (edit a logged intake) -->
+<div class="overlay" id="medEntryOverlay" style="display:none;">
+  <div class="modal">
+    <h3>Einnahme bearbeiten</h3>
+    <div class="two-col">
+      <div class="field">
+        <label>Datum</label>
+        <input type="date" id="meDate">
+      </div>
+      <div class="field">
+        <label>Uhrzeit</label>
+        <input type="time" id="meTime">
+      </div>
+    </div>
+    <div class="field">
+      <label>Notiz (optional)</label>
+      <input type="text" id="meNote">
+    </div>
+    <div class="modal-actions">
+      <button class="btn danger" id="meDelete" style="margin-right:auto;">Löschen</button>
+      <button class="btn ghost" id="meCancel">Abbrechen</button>
+      <button class="btn primary" id="meSave">Speichern</button>
+    </div>
+  </div>
+</div>
+
 <script>
 (function(){
 "use strict";
 
-const STORAGE_KEY = "injectionTrackerData_v1";
+const STORAGE_KEY = "injectionTrackerData_v2";
+const OLD_STORAGE_KEY = "injectionTrackerData_v1";
 
 const SITES = [
-  {id:"bauch-links-oben",    zone:"bauch", side:"links",  pos:"oben",  cx:118, cy:150},
-  {id:"bauch-links-mitte",   zone:"bauch", side:"links",  pos:"mitte", cx:118, cy:180},
-  {id:"bauch-links-unten",   zone:"bauch", side:"links",  pos:"unten", cx:118, cy:210},
-  {id:"bauch-rechts-oben",   zone:"bauch", side:"rechts", pos:"oben",  cx:182, cy:150},
-  {id:"bauch-rechts-mitte",  zone:"bauch", side:"rechts", pos:"mitte", cx:182, cy:180},
-  {id:"bauch-rechts-unten",  zone:"bauch", side:"rechts", pos:"unten", cx:182, cy:210},
-  {id:"oberschenkel-links-oben",   zone:"oberschenkel", side:"links",  pos:"oben",  cx:117, cy:275},
-  {id:"oberschenkel-links-mitte",  zone:"oberschenkel", side:"links",  pos:"mitte", cx:117, cy:325},
-  {id:"oberschenkel-links-unten",  zone:"oberschenkel", side:"links",  pos:"unten", cx:117, cy:375},
-  {id:"oberschenkel-rechts-oben",  zone:"oberschenkel", side:"rechts", pos:"oben",  cx:183, cy:275},
-  {id:"oberschenkel-rechts-mitte", zone:"oberschenkel", side:"rechts", pos:"mitte", cx:183, cy:325},
-  {id:"oberschenkel-rechts-unten", zone:"oberschenkel", side:"rechts", pos:"unten", cx:183, cy:375},
+  {id:"bauch-links-oben",    zone:"bauch", side:"links",  pos:"oben",  cx:114, cy:160},
+  {id:"bauch-links-mitte",   zone:"bauch", side:"links",  pos:"mitte", cx:110, cy:196},
+  {id:"bauch-links-unten",   zone:"bauch", side:"links",  pos:"unten", cx:114, cy:230},
+  {id:"bauch-rechts-oben",   zone:"bauch", side:"rechts", pos:"oben",  cx:186, cy:160},
+  {id:"bauch-rechts-mitte",  zone:"bauch", side:"rechts", pos:"mitte", cx:190, cy:196},
+  {id:"bauch-rechts-unten",  zone:"bauch", side:"rechts", pos:"unten", cx:186, cy:230},
+  {id:"oberschenkel-links-oben",   zone:"oberschenkel", side:"links",  pos:"oben",  cx:112, cy:330},
+  {id:"oberschenkel-links-mitte",  zone:"oberschenkel", side:"links",  pos:"mitte", cx:110, cy:375},
+  {id:"oberschenkel-links-unten",  zone:"oberschenkel", side:"links",  pos:"unten", cx:112, cy:420},
+  {id:"oberschenkel-rechts-oben",  zone:"oberschenkel", side:"rechts", pos:"oben",  cx:188, cy:330},
+  {id:"oberschenkel-rechts-mitte", zone:"oberschenkel", side:"rechts", pos:"mitte", cx:190, cy:375},
+  {id:"oberschenkel-rechts-unten", zone:"oberschenkel", side:"rechts", pos:"unten", cx:188, cy:420},
 ];
 
-const ZONE_LABEL = {bauch:"Bauch", oberschenkel:"Oberschenkel"};
+const ZONE_LABEL = {bauch:"Bauch", oberschenkel:"Oberschenkel", beide:"Bauch/Oberschenkel"};
 const SIDE_LABEL = {links:"links", rechts:"rechts"};
 const POS_LABEL = {oben:"oben", mitte:"mitte", unten:"unten"};
 
@@ -241,47 +384,103 @@ function uid(){
   return (crypto.randomUUID ? crypto.randomUUID() : "id-"+Date.now()+"-"+Math.random().toString(16).slice(2));
 }
 
-let state = loadState();
+function defaultSettings(){
+  return {
+    restDays: 14,
+    disabledSites: [],
+    medicationEnabled: true,
+    syringes: [
+      {enabled:true, name:"Spritze 1", zone:"bauch", intervalDays:7},
+      {enabled:true, name:"Spritze 2", zone:"oberschenkel", intervalDays:7}
+    ]
+  };
+}
 
 function defaultState(){
   return {
     history: [],
-    settings: { reserve: true, swap: false, restDays: 14 },
-    nextSeq: 1
+    medications: [],
+    medHistory: [],
+    settings: defaultSettings(),
+    nextSeq: 1,
+    nextMedSeq: 1
   };
 }
 
-// Zeitstempel werden auf die Minute gerundet (siehe quickLog/Modal), daher
-// reicht "ts" allein nicht, um bei kurz hintereinander erfassten Einträgen
-// (z.B. beide Spritzen direkt nacheinander) die tatsächliche Reihenfolge zu
-// bestimmen. "seq" ist ein monoton steigender Zähler, der die echte
-// Erfassungsreihenfolge unabhängig von Zeitstempel-Kollisionen festhält.
+// v1 hatte nur {reserve, swap, restDays} statt der neuen "syringes"-Liste.
+function migrateSettingsV1(oldSettings){
+  const s = defaultSettings();
+  if(!oldSettings) return s;
+  if(typeof oldSettings.restDays === "number") s.restDays = oldSettings.restDays;
+  if(oldSettings.reserve){
+    s.syringes[0].zone = oldSettings.swap ? "oberschenkel" : "bauch";
+    s.syringes[1].zone = oldSettings.swap ? "bauch" : "oberschenkel";
+  } else {
+    s.syringes[0].zone = "beide";
+    s.syringes[1].zone = "beide";
+  }
+  return s;
+}
+
 function ensureSeq(){
   let changed = false;
   let maxSeq = 0;
-  const withSeq = state.history.filter(e=>Number.isFinite(e.seq));
+  for(const e of state.history) if(Number.isFinite(e.seq) && e.seq > maxSeq) maxSeq = e.seq;
   const withoutSeq = state.history.filter(e=>!Number.isFinite(e.seq));
-  for(const e of withSeq) if(e.seq > maxSeq) maxSeq = e.seq;
   if(withoutSeq.length){
     withoutSeq.sort((a,b)=>a.ts - b.ts);
     for(const e of withoutSeq){ maxSeq += 1; e.seq = maxSeq; }
     changed = true;
   }
-  if(!Number.isFinite(state.nextSeq) || state.nextSeq <= maxSeq){
-    state.nextSeq = maxSeq + 1;
+  if(!Number.isFinite(state.nextSeq) || state.nextSeq <= maxSeq){ state.nextSeq = maxSeq + 1; changed = true; }
+
+  let maxMedSeq = 0;
+  for(const e of state.medHistory) if(Number.isFinite(e.seq) && e.seq > maxMedSeq) maxMedSeq = e.seq;
+  const medWithoutSeq = state.medHistory.filter(e=>!Number.isFinite(e.seq));
+  if(medWithoutSeq.length){
+    medWithoutSeq.sort((a,b)=>a.ts - b.ts);
+    for(const e of medWithoutSeq){ maxMedSeq += 1; e.seq = maxMedSeq; }
     changed = true;
   }
+  if(!Number.isFinite(state.nextMedSeq) || state.nextMedSeq <= maxMedSeq){ state.nextMedSeq = maxMedSeq + 1; changed = true; }
   return changed;
+}
+
+// Für history-Einträge ohne group (aus v1 oder Import): bestmöglich anhand
+// der aktuellen Spritzen-Zuordnung nachträglich befüllen.
+function backfillGroups(){
+  for(const e of state.history){
+    if(e.group !== undefined) continue;
+    const site = SITES.find(s=>s.id===e.siteId);
+    const matches = site ? syringesForSite(site) : [];
+    e.group = matches.length ? matches[0] : null;
+  }
 }
 
 function loadState(){
   try{
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if(!raw) return defaultState();
-    const parsed = JSON.parse(raw);
-    return Object.assign(defaultState(), parsed, {
-      settings: Object.assign(defaultState().settings, parsed.settings||{})
-    });
+    let raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      const parsed = JSON.parse(raw);
+      const s = Object.assign(defaultState(), parsed, {
+        settings: Object.assign(defaultSettings(), parsed.settings||{}, {
+          syringes: (parsed.settings && Array.isArray(parsed.settings.syringes) && parsed.settings.syringes.length===2)
+            ? parsed.settings.syringes.map((cfg,i)=>Object.assign({enabled:true,name:`Spritze ${i+1}`,zone:i===0?"bauch":"oberschenkel",intervalDays:7}, cfg))
+            : defaultSettings().syringes
+        })
+      });
+      return s;
+    }
+    const oldRaw = localStorage.getItem(OLD_STORAGE_KEY);
+    if(oldRaw){
+      const parsed = JSON.parse(oldRaw);
+      const s = defaultState();
+      s.history = Array.isArray(parsed.history) ? parsed.history : [];
+      s.nextSeq = Number.isFinite(parsed.nextSeq) ? parsed.nextSeq : 1;
+      s.settings = migrateSettingsV1(parsed.settings);
+      return s;
+    }
+    return defaultState();
   }catch(e){
     console.warn("Konnte gespeicherte Daten nicht lesen, starte neu.", e);
     return defaultState();
@@ -292,7 +491,13 @@ function saveState(){
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
-// --- derived data ---------------------------------------------------
+let state = loadState();
+
+// --- derived data: injection sites -----------------------------------
+
+function isDisabled(siteId){
+  return state.settings.disabledSites.includes(siteId);
+}
 
 function latestEntryForSites(siteIds){
   const ids = siteIds instanceof Set ? siteIds : new Set(siteIds);
@@ -309,7 +514,7 @@ function lastTouch(siteId){
 }
 
 function daysSince(ts){
-  if(ts===null) return Infinity;
+  if(ts===null || ts===undefined) return Infinity;
   return (Date.now() - ts) / 86400000;
 }
 
@@ -323,21 +528,23 @@ function siteStatus(siteId){
   return {level:"recent", days:d, ts};
 }
 
-function groupForZone(zone){
-  const {reserve, swap} = state.settings;
-  if(!reserve) return null; // no fixed group, pooled
-  if(zone==="bauch") return swap ? 2 : 1;
-  return swap ? 1 : 2;
+function syringesForSite(site){
+  const res = [];
+  state.settings.syringes.forEach((cfg,i)=>{
+    if(cfg.enabled && (cfg.zone==="beide" || cfg.zone===site.zone)) res.push(i+1);
+  });
+  return res;
 }
 
-function recommendations(){
-  if(state.settings.reserve){
-    const group1Sites = SITES.filter(s=>groupForZone(s.zone)===1);
-    const group2Sites = SITES.filter(s=>groupForZone(s.zone)===2);
-    return [pickBest(group1Sites), pickBest(group2Sites)];
-  }
-  const sorted = [...SITES].sort((a,b)=>daysSince(lastTouch(b.id)) - daysSince(lastTouch(a.id)));
-  return [sorted[0], sorted[1]];
+function syringeName(idx){
+  const cfg = state.settings.syringes[idx-1];
+  return cfg ? (cfg.name && cfg.name.trim() ? cfg.name.trim() : `Spritze ${idx}`) : `Spritze ${idx}`;
+}
+
+function sitesForSyringe(idx){
+  const cfg = state.settings.syringes[idx-1];
+  if(!cfg || !cfg.enabled) return [];
+  return SITES.filter(s=>!isDisabled(s.id) && (cfg.zone==="beide" || cfg.zone===s.zone));
 }
 
 function lastUsedSide(sites){
@@ -363,6 +570,35 @@ function pickBest(sites){
   return best;
 }
 
+function recommendations(){
+  const result = {};
+  const used = [];
+  for(let idx=1; idx<=2; idx++){
+    const cfg = state.settings.syringes[idx-1];
+    if(!cfg || !cfg.enabled){ result[idx] = null; continue; }
+    const sites = sitesForSyringe(idx).filter(s=>!used.includes(s.id));
+    const pick = pickBest(sites);
+    result[idx] = pick;
+    if(pick) used.push(pick.id);
+  }
+  return result;
+}
+
+function syringeGateInfo(idx){
+  const cfg = state.settings.syringes[idx-1];
+  if(!cfg || !cfg.enabled) return {blocked:false};
+  let last = null;
+  for(const e of state.history){
+    if(e.type==="injektion" && e.group===idx && (!last || e.seq>last.seq)) last = e;
+  }
+  if(!last) return {blocked:false};
+  const days = daysSince(last.ts);
+  if(days < cfg.intervalDays){
+    return {blocked:true, days, lastTs:last.ts, nextTs: last.ts + cfg.intervalDays*86400000};
+  }
+  return {blocked:false};
+}
+
 function relDays(days){
   if(days===Infinity) return "noch nie benutzt";
   const d = Math.floor(days);
@@ -371,49 +607,79 @@ function relDays(days){
   return `vor ${d} Tagen`;
 }
 
+function formatDate(ts){
+  return new Date(ts).toLocaleDateString("de-DE",{day:"2-digit",month:"2-digit",year:"numeric"});
+}
+function formatDateTime(ts){
+  return new Date(ts).toLocaleString("de-DE",{day:"2-digit",month:"2-digit",year:"2-digit",hour:"2-digit",minute:"2-digit"});
+}
+
 // --- rendering: body map --------------------------------------------
 
-const svgNS = "http://www.w3.org/2000/svg";
 const bodyMap = document.getElementById("bodyMap");
 
 function drawSilhouette(){
+  // Kopf, Hals, Rumpf (Taille schmaler als Schultern/Hüfte), Arme und Beine
+  // als separate, weich gerundete Pfade – deutlich präziser als ein
+  // Rechteck-Strichmännchen, aber bewusst weiterhin abstrakt/unisex.
   const parts = [
-    `<circle cx="150" cy="38" r="26" fill="none" stroke="var(--border)" stroke-width="2"/>`,
-    `<rect x="60" y="88" width="26" height="105" rx="12" fill="none" stroke="var(--border)" stroke-width="2"/>`,
-    `<rect x="214" y="88" width="26" height="105" rx="12" fill="none" stroke="var(--border)" stroke-width="2"/>`,
-    `<rect x="88" y="72" width="124" height="165" rx="22" fill="none" stroke="var(--border)" stroke-width="2"/>`,
-    `<rect x="93" y="237" width="46" height="200" rx="20" fill="none" stroke="var(--border)" stroke-width="2"/>`,
-    `<rect x="161" y="237" width="46" height="200" rx="20" fill="none" stroke="var(--border)" stroke-width="2"/>`,
+    `<ellipse class="body-outline" cx="150" cy="42" rx="23" ry="27"/>`,
+    `<path class="body-outline" d="M138,64 L162,64 L157,92 L143,92 Z"/>`,
+    `<path class="body-outline" d="M95,92 C82,102 68,130 65,168 C63,196 68,222 76,242 C80,249 88,249 92,242 C86,214 90,182 98,154 C102,132 102,108 95,92 Z"/>`,
+    `<path class="body-outline" d="M205,92 C218,102 232,130 235,168 C237,196 232,222 224,242 C220,249 212,249 208,242 C214,214 210,182 202,154 C198,132 198,108 205,92 Z"/>`,
+    `<path class="body-outline" d="M96,88 C84,112 82,150 96,190 C102,207 106,214 100,236 L104,262 L150,268 L196,262 L200,236 C194,214 198,207 204,190 C218,150 216,112 204,88 C188,79 112,79 96,88 Z"/>`,
+    `<path class="body-outline" d="M100,258 C90,290 84,320 88,352 C82,362 78,384 82,410 C79,432 84,450 92,462 L124,462 C128,438 124,412 118,392 C124,352 130,308 130,278 C130,266 122,258 108,256 C104,256 101,257 100,258 Z"/>`,
+    `<path class="body-outline" d="M200,258 C210,290 216,320 212,352 C218,362 222,384 218,410 C221,432 216,450 208,462 L176,462 C172,438 176,412 182,392 C176,352 170,308 170,278 C170,266 178,258 192,256 C196,256 199,257 200,258 Z"/>`,
+    `<path class="body-outline" d="M88,458 L96,472 L128,472 L124,460 Z"/>`,
+    `<path class="body-outline" d="M212,458 L204,472 L172,472 L176,460 Z"/>`,
   ];
-  return parts.join("");
+  const navel = `<circle class="zone-hint" cx="150" cy="195" r="19"/><circle cx="150" cy="195" r="2" fill="var(--muted)" opacity=".6"/>`;
+  const kneeLineL = `<line class="zone-hint" x1="86" y1="452" x2="122" y2="452"/>`;
+  const kneeLineR = `<line class="zone-hint" x1="214" y1="452" x2="178" y2="452"/>`;
+  return parts.join("") + navel + kneeLineL + kneeLineR;
 }
 
 function statusColor(level){
-  return {unused:"var(--unused)", ok:"var(--ok)", soon:"var(--soon)", recent:"var(--recent)"}[level];
+  return {unused:"var(--unused)", ok:"var(--ok)", soon:"var(--soon)", recent:"var(--recent)", disabled:"var(--disabled)"}[level];
 }
 
 function renderBody(){
   const recs = recommendations();
-  const recIds = recs.filter(Boolean).map(r=>r.id);
 
   let svg = drawSilhouette();
-  svg += `<text x="150" y="66" class="site-label" style="font-size:11px;">Bauch</text>`;
-  svg += `<text x="150" y="260" class="site-label" style="font-size:11px;">Oberschenkel</text>`;
+  svg += `<text x="150" y="122" class="site-label" style="font-size:11px;">Bauch</text>`;
+  svg += `<text x="150" y="300" class="site-label" style="font-size:11px;">Oberschenkel</text>`;
 
   for(const s of SITES){
+    const disabled = isDisabled(s.id);
     const st = siteStatus(s.id);
-    const color = statusColor(st.level);
-    const isRec1 = recs[0] && recs[0].id === s.id;
-    const isRec2 = recs[1] && recs[1].id === s.id;
-    if(isRec1 || isRec2){
+    const color = disabled ? statusColor("disabled") : statusColor(st.level);
+    const isRec1 = recs[1] && recs[1].id === s.id;
+    const isRec2 = recs[2] && recs[2].id === s.id;
+    if(!disabled && (isRec1 || isRec2)){
       const ringColor = isRec1 ? "var(--accent1)" : "var(--accent2)";
       svg += `<circle cx="${s.cx}" cy="${s.cy}" r="15" class="rec-ring" style="stroke:${ringColor}"/>`;
     }
-    svg += `<circle class="site-dot" data-site="${s.id}" cx="${s.cx}" cy="${s.cy}" r="9" fill="${color}"><title>${siteName(s.id)} — ${relDays(st.days)}</title></circle>`;
+    const title = disabled ? `${siteName(s.id)} — deaktiviert` : `${siteName(s.id)} — ${relDays(st.days)}`;
+    svg += `<circle class="site-dot${disabled?' site-disabled':''}" data-site="${s.id}" cx="${s.cx}" cy="${s.cy}" r="9" fill="${color}" ${disabled?'opacity="0.5"':''}><title>${title}</title></circle>`;
+    if(disabled){
+      svg += `<line x1="${s.cx-5}" y1="${s.cy-5}" x2="${s.cx+5}" y2="${s.cy+5}" stroke="var(--card)" stroke-width="1.6" pointer-events="none"/>`;
+      svg += `<line x1="${s.cx-5}" y1="${s.cy+5}" x2="${s.cx+5}" y2="${s.cy-5}" stroke="var(--card)" stroke-width="1.6" pointer-events="none"/>`;
+    }
   }
   bodyMap.innerHTML = svg;
   bodyMap.querySelectorAll(".site-dot").forEach(el=>{
-    el.addEventListener("click", ()=> openModal({siteId: el.dataset.site}));
+    el.addEventListener("click", ()=>{
+      const id = el.dataset.site;
+      if(isDisabled(id)){
+        if(confirm(`${siteName(id)} ist deaktiviert. Wieder aktivieren?`)){
+          state.settings.disabledSites = state.settings.disabledSites.filter(x=>x!==id);
+          saveState(); renderAll();
+        }
+        return;
+      }
+      openModal({siteId:id});
+    });
   });
 }
 
@@ -424,6 +690,7 @@ function renderLegend(){
     <span><i class="dot" style="background:var(--ok)"></i>Bereit</span>
     <span><i class="dot" style="background:var(--soon)"></i>Bald wieder bereit</span>
     <span><i class="dot" style="background:var(--recent)"></i>Kürzlich benutzt</span>
+    <span><i class="dot" style="background:var(--disabled)"></i>Deaktiviert</span>
   `;
 }
 
@@ -433,34 +700,46 @@ function renderRecommendations(){
   const recs = recommendations();
   const recRow = document.getElementById("recRow");
   recRow.innerHTML = "";
-  recs.forEach((site, idx)=>{
-    if(!site) return;
-    const st = siteStatus(site.id);
-    const groupClass = idx===0 ? "g1" : "g2";
+  let any = false;
+  for(let idx=1; idx<=2; idx++){
+    const cfg = state.settings.syringes[idx-1];
+    if(!cfg || !cfg.enabled) continue;
+    any = true;
+    const site = recs[idx];
+    const gate = syringeGateInfo(idx);
+    const groupClass = idx===1 ? "g1" : "g2";
     const div = document.createElement("div");
     div.className = `rec-card ${groupClass}`;
-    div.innerHTML = `
-      <span class="badge">Spritze ${idx+1}</span>
-      <div class="site-name">${siteName(site.id)}</div>
-      <div class="since">${relDays(st.days)}</div>
-      <div class="actions">
-        <button class="btn primary small" data-act="log">Injektion eintragen</button>
+    let body = `<span class="badge">${escapeHtml(syringeName(idx))}</span>`;
+    if(!site){
+      body += `<div class="site-name">Keine verfügbare Stelle</div><div class="since">Alle Stellen in diesem Bereich sind deaktiviert.</div>`;
+    } else {
+      const st = siteStatus(site.id);
+      body += `<div class="site-name">${siteName(site.id)}</div><div class="since">${relDays(st.days)}</div>`;
+      if(gate.blocked){
+        body += `<div class="warn">⚠ Mindestabstand von ${cfg.intervalDays} Tagen noch nicht erreicht. Zuletzt am ${formatDate(gate.lastTs)}, nächste Injektion frühestens am ${formatDate(gate.nextTs)}.</div>`;
+      }
+      body += `<div class="actions">
+        <button class="btn primary small" data-act="log" ${gate.blocked?"disabled":""}>Injektion eintragen</button>
         <button class="btn small" data-act="skip">Überspringen</button>
-      </div>
-    `;
-    div.querySelector('[data-act="log"]').addEventListener("click", ()=>{
-      quickLog(site.id, "injektion");
-    });
-    div.querySelector('[data-act="skip"]').addEventListener("click", ()=>{
-      quickLog(site.id, "uebersprungen");
-    });
+      </div>`;
+    }
+    div.innerHTML = body;
+    if(site){
+      const logBtn = div.querySelector('[data-act="log"]');
+      if(logBtn) logBtn.addEventListener("click", ()=>{ if(!gate.blocked) quickLog(site.id, "injektion", idx); });
+      div.querySelector('[data-act="skip"]').addEventListener("click", ()=>{ quickLog(site.id, "uebersprungen", idx); });
+    }
     recRow.appendChild(div);
-  });
+  }
+  if(!any){
+    recRow.innerHTML = `<div class="empty">Keine Spritze aktiviert — unter "Was möchtest du verwalten?" aktivieren.</div>`;
+  }
 }
 
-function quickLog(siteId, type){
+function quickLog(siteId, type, group){
   const ts = Math.floor(Date.now() / 60000) * 60000; // minute precision, matches manual entries
-  state.history.push({id: uid(), siteId, type, ts, note: "", seq: state.nextSeq++});
+  state.history.push({id: uid(), siteId, type, ts, note: "", seq: state.nextSeq++, group: group ?? null});
   saveState();
   renderAll();
 }
@@ -470,19 +749,17 @@ function quickLog(siteId, type){
 function renderHistory(){
   const body = document.getElementById("historyBody");
   const empty = document.getElementById("historyEmpty");
-  const rows = [...state.history].sort((a,b)=>b.ts - a.ts);
+  const rows = [...state.history].sort((a,b)=>b.seq - a.seq);
   body.innerHTML = "";
   empty.style.display = rows.length ? "none" : "block";
 
   for(const e of rows){
-    const site = SITES.find(s=>s.id===e.siteId);
-    const grp = site ? groupForZone(site.zone) : null;
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${new Date(e.ts).toLocaleString("de-DE",{day:"2-digit",month:"2-digit",year:"2-digit",hour:"2-digit",minute:"2-digit"})}</td>
+      <td>${formatDateTime(e.ts)}</td>
       <td>${siteName(e.siteId)}</td>
       <td><span class="type-pill ${e.type==='injektion'?'type-inj':'type-skip'}">${e.type==='injektion'?'Injektion':'Übersprungen'}</span></td>
-      <td>${grp ? "Spritze "+grp : "–"}</td>
+      <td>${e.group ? escapeHtml(syringeName(e.group)) : "–"}</td>
       <td>${e.note ? escapeHtml(e.note) : ""}</td>
       <td class="actions-cell"><button class="btn small" data-act="edit">Bearbeiten</button></td>
     `;
@@ -497,25 +774,110 @@ function escapeHtml(s){
   return d.innerHTML;
 }
 
-// --- settings ------------------------------------------------------
+// --- rendering: "was verwalten" toggles -------------------------------
 
-function renderSettings(){
-  document.getElementById("cfgReserve").checked = state.settings.reserve;
-  document.getElementById("cfgSwap").checked = state.settings.swap;
-  document.getElementById("cfgRest").value = state.settings.restDays;
+function renderManageToggles(){
+  document.getElementById("cfgSyr1Enabled").checked = state.settings.syringes[0].enabled;
+  document.getElementById("cfgSyr2Enabled").checked = state.settings.syringes[1].enabled;
+  document.getElementById("cfgMedEnabled").checked = state.settings.medicationEnabled;
+}
+document.getElementById("cfgSyr1Enabled").addEventListener("change", e=>{
+  state.settings.syringes[0].enabled = e.target.checked; saveState(); renderAll();
+});
+document.getElementById("cfgSyr2Enabled").addEventListener("change", e=>{
+  state.settings.syringes[1].enabled = e.target.checked; saveState(); renderAll();
+});
+document.getElementById("cfgMedEnabled").addEventListener("change", e=>{
+  state.settings.medicationEnabled = e.target.checked; saveState(); renderAll();
+});
+
+// --- rendering: per-syringe settings -----------------------------------
+
+function renderSyringeCfg(){
+  const el = document.getElementById("syringeCfgList");
+  el.innerHTML = "";
+  for(let idx=1; idx<=2; idx++){
+    const cfg = state.settings.syringes[idx-1];
+    if(!cfg.enabled) continue;
+    const box = document.createElement("div");
+    box.className = "syringe-cfg";
+    box.innerHTML = `
+      <div class="cfg-title">${idx===1?"Spritze 1":"Spritze 2"}</div>
+      <div class="cfg-grid">
+        <div class="field-inline">
+          <label>Name</label>
+          <input type="text" data-cfg="name" data-idx="${idx}" value="${escapeHtml(cfg.name)}">
+        </div>
+        <div class="field-inline">
+          <label>Bereich</label>
+          <select data-cfg="zone" data-idx="${idx}">
+            <option value="bauch" ${cfg.zone==='bauch'?'selected':''}>Bauch</option>
+            <option value="oberschenkel" ${cfg.zone==='oberschenkel'?'selected':''}>Oberschenkel</option>
+            <option value="beide" ${cfg.zone==='beide'?'selected':''}>Beide (kein reservierter Bereich)</option>
+          </select>
+        </div>
+        <div class="field-inline" style="grid-column:1 / -1;">
+          <label>Mindestabstand zwischen Injektionen (Tage)</label>
+          <input type="number" min="1" max="60" style="width:100px;" data-cfg="intervalDays" data-idx="${idx}" value="${cfg.intervalDays}">
+        </div>
+      </div>
+    `;
+    el.appendChild(box);
+  }
+  el.querySelectorAll('[data-cfg="name"]').forEach(inp=>{
+    inp.addEventListener("change", e=>{
+      const idx = parseInt(e.target.dataset.idx,10);
+      state.settings.syringes[idx-1].name = e.target.value.trim() || `Spritze ${idx}`;
+      saveState(); renderAll();
+    });
+  });
+  el.querySelectorAll('[data-cfg="zone"]').forEach(sel=>{
+    sel.addEventListener("change", e=>{
+      const idx = parseInt(e.target.dataset.idx,10);
+      state.settings.syringes[idx-1].zone = e.target.value;
+      saveState(); renderAll();
+    });
+  });
+  el.querySelectorAll('[data-cfg="intervalDays"]').forEach(inp=>{
+    inp.addEventListener("change", e=>{
+      const idx = parseInt(e.target.dataset.idx,10);
+      const v = parseInt(e.target.value,10);
+      state.settings.syringes[idx-1].intervalDays = (Number.isFinite(v) && v>0) ? v : 7;
+      saveState(); renderAll();
+    });
+  });
 }
 
-document.getElementById("cfgReserve").addEventListener("change", e=>{
-  state.settings.reserve = e.target.checked; saveState(); renderAll();
-});
-document.getElementById("cfgSwap").addEventListener("change", e=>{
-  state.settings.swap = e.target.checked; saveState(); renderAll();
-});
 document.getElementById("cfgRest").addEventListener("change", e=>{
   const v = parseInt(e.target.value, 10);
   state.settings.restDays = (Number.isFinite(v) && v>0) ? v : 14;
   saveState(); renderAll();
 });
+
+// --- rendering: site management (permanent disable) ---------------------
+
+function renderSiteManage(){
+  const el = document.getElementById("siteManageList");
+  el.innerHTML = SITES.map(s=>{
+    const disabled = isDisabled(s.id);
+    return `<div class="row">
+      <div>${siteName(s.id)}${disabled?' <span style="color:var(--recent);font-size:.72rem;">(deaktiviert)</span>':''}</div>
+      <label class="switch"><input type="checkbox" data-site="${s.id}" ${disabled?'':'checked'}><span class="slider"></span></label>
+    </div>`;
+  }).join("");
+  el.querySelectorAll('input[type=checkbox]').forEach(cb=>{
+    cb.addEventListener("change", e=>{
+      const id = e.target.dataset.site;
+      const list = state.settings.disabledSites;
+      const i = list.indexOf(id);
+      if(e.target.checked && i>=0) list.splice(i,1);
+      if(!e.target.checked && i<0) list.push(id);
+      saveState(); renderAll();
+    });
+  });
+}
+
+// --- export / import / reset -------------------------------------------
 
 document.getElementById("btnExport").addEventListener("click", ()=>{
   const blob = new Blob([JSON.stringify(state, null, 2)], {type:"application/json"});
@@ -539,9 +901,16 @@ document.getElementById("fileImport").addEventListener("change", e=>{
       const parsed = JSON.parse(reader.result);
       if(!Array.isArray(parsed.history)) throw new Error("Ungültiges Format");
       state = Object.assign(defaultState(), parsed, {
-        settings: Object.assign(defaultState().settings, parsed.settings||{})
+        settings: Object.assign(defaultSettings(), parsed.settings||{}, {
+          syringes: (parsed.settings && Array.isArray(parsed.settings.syringes) && parsed.settings.syringes.length===2)
+            ? parsed.settings.syringes
+            : defaultSettings().syringes
+        }),
+        medications: Array.isArray(parsed.medications) ? parsed.medications : [],
+        medHistory: Array.isArray(parsed.medHistory) ? parsed.medHistory : []
       });
       ensureSeq();
+      backfillGroups();
       saveState();
       renderAll();
     }catch(err){
@@ -570,18 +939,102 @@ const fNote = document.getElementById("fNote");
 const segInj = document.getElementById("segInj");
 const segSkip = document.getElementById("segSkip");
 const btnDeleteEntry = document.getElementById("btnDeleteEntry");
+const btnToggleDisable = document.getElementById("btnToggleDisable");
+const gateWarningEl = document.getElementById("gateWarning");
+const btnSave = document.getElementById("btnSave");
 let modalType = "injektion";
+let modalGroup = null;
 let editingEntryId = null;
 
-fSite.innerHTML = SITES.map(s=>`<option value="${s.id}">${siteName(s.id)}</option>`).join("");
+function buildSiteOptions(includeDisabledId){
+  return SITES.filter(s=>!isDisabled(s.id) || s.id===includeDisabledId)
+    .map(s=>`<option value="${s.id}">${siteName(s.id)}${isDisabled(s.id)?' (deaktiviert)':''}</option>`).join("");
+}
 
 function setModalType(t){
   modalType = t;
   segInj.classList.toggle("active", t==="injektion");
   segSkip.classList.toggle("active", t==="uebersprungen");
+  updateGateWarning();
 }
 segInj.addEventListener("click", ()=>setModalType("injektion"));
 segSkip.addEventListener("click", ()=>setModalType("uebersprungen"));
+
+function currentModalSite(){
+  return SITES.find(s=>s.id===fSite.value) || null;
+}
+
+function enabledSyringes(){
+  return [1,2].filter(idx=>state.settings.syringes[idx-1].enabled);
+}
+
+// Der reguläre Bereich pro Spritze ist nur der Standard-Vorschlag. Man kann
+// eine Stelle bewusst einer anderen (aktiven) Spritze zuordnen, z.B. um eine
+// Zone vorübergehend mitzubenutzen — die Stelle rutscht dadurch automatisch
+// ans Ende ihrer eigenen Rotation, da die Auffrischung pro Stelle global gilt.
+function updateModalGroupUI(){
+  const site = currentModalSite();
+  const natural = site ? syringesForSite(site) : [];
+  const enabled = enabledSyringes();
+  const box = document.getElementById("fGroupOptions");
+  if(enabled.length===0){
+    modalGroup = null;
+    box.innerHTML = `<div class="sub" style="margin:0;">Keine Spritze aktiv</div>`;
+  } else if(enabled.length===1){
+    modalGroup = enabled[0];
+    box.innerHTML = `<div style="font-weight:600;font-size:.9rem;">${escapeHtml(syringeName(enabled[0]))}</div>`;
+  } else {
+    if(modalGroup===null || !enabled.includes(modalGroup)){
+      modalGroup = natural.length===1 ? natural[0] : enabled[0];
+    }
+    box.innerHTML = enabled.map(idx=>{
+      const isTemp = !natural.includes(idx);
+      return `<label class="radio-row">
+        <input type="radio" name="fGroupRadio" value="${idx}" ${idx===modalGroup?"checked":""}> ${escapeHtml(syringeName(idx))}${isTemp?' <span class="sub" style="margin:0;">(außerhalb des regulären Bereichs)</span>':''}
+      </label>`;
+    }).join("");
+    box.querySelectorAll('input[name="fGroupRadio"]').forEach(r=>{
+      r.addEventListener("change", ()=>{ modalGroup = parseInt(r.value,10); updateGateWarning(); });
+    });
+  }
+  updateBtnToggleDisableLabel();
+  updateGateWarning();
+}
+
+function updateBtnToggleDisableLabel(){
+  const site = currentModalSite();
+  if(!site){ btnToggleDisable.style.display = "none"; return; }
+  btnToggleDisable.style.display = "inline-block";
+  btnToggleDisable.textContent = isDisabled(site.id) ? "Stelle wieder aktivieren" : "Diese Stelle dauerhaft deaktivieren";
+}
+
+btnToggleDisable.addEventListener("click", ()=>{
+  const site = currentModalSite();
+  if(!site) return;
+  const list = state.settings.disabledSites;
+  const i = list.indexOf(site.id);
+  if(i>=0) list.splice(i,1); else list.push(site.id);
+  saveState();
+  const keepId = site.id;
+  fSite.innerHTML = buildSiteOptions(keepId);
+  fSite.value = keepId;
+  updateModalGroupUI();
+});
+
+function updateGateWarning(){
+  let msg = "";
+  if(modalType==="injektion" && !editingEntryId && modalGroup){
+    const gate = syringeGateInfo(modalGroup);
+    if(gate.blocked){
+      msg = `⚠ Mindestabstand für ${syringeName(modalGroup)} (${state.settings.syringes[modalGroup-1].intervalDays} Tage) noch nicht erreicht. Zuletzt am ${formatDate(gate.lastTs)}, nächste Injektion frühestens am ${formatDate(gate.nextTs)}.`;
+    }
+  }
+  gateWarningEl.textContent = msg;
+  gateWarningEl.style.display = msg ? "block" : "none";
+  btnSave.disabled = !!msg;
+}
+
+fSite.addEventListener("change", updateModalGroupUI);
 
 function openModal({siteId, entryId}={}){
   editingEntryId = entryId || null;
@@ -590,13 +1043,17 @@ function openModal({siteId, entryId}={}){
     entry = state.history.find(e=>e.id===editingEntryId);
   }
   document.getElementById("modalTitle").textContent = editingEntryId ? "Eintrag bearbeiten" : "Einstichstelle protokollieren";
+  const targetSiteId = entry ? entry.siteId : (siteId || SITES.find(s=>!isDisabled(s.id)).id);
+  fSite.innerHTML = buildSiteOptions(entry ? entry.siteId : null);
+  fSite.value = targetSiteId;
+  modalGroup = entry ? entry.group : null;
   const now = entry ? new Date(entry.ts) : new Date();
-  fSite.value = entry ? entry.siteId : (siteId || SITES[0].id);
   setModalType(entry ? entry.type : "injektion");
   fDate.value = toDateInput(now);
   fTime.value = toTimeInput(now);
   fNote.value = entry ? (entry.note||"") : "";
   btnDeleteEntry.style.display = editingEntryId ? "inline-block" : "none";
+  updateModalGroupUI();
   overlay.style.display = "flex";
 }
 
@@ -615,11 +1072,12 @@ function closeModal(){
 document.getElementById("btnCancel").addEventListener("click", closeModal);
 overlay.addEventListener("click", e=>{ if(e.target===overlay) closeModal(); });
 
-document.getElementById("btnSave").addEventListener("click", ()=>{
+btnSave.addEventListener("click", ()=>{
   const [y,m,d] = fDate.value.split("-").map(Number);
   const [hh,mm] = fTime.value.split(":").map(Number);
   const ts = new Date(y, m-1, d, hh, mm).getTime();
   if(!Number.isFinite(ts)){ alert("Bitte gültiges Datum/Uhrzeit angeben."); return; }
+  if(btnSave.disabled) return;
 
   if(editingEntryId){
     const entry = state.history.find(e=>e.id===editingEntryId);
@@ -627,8 +1085,9 @@ document.getElementById("btnSave").addEventListener("click", ()=>{
     entry.type = modalType;
     entry.ts = ts;
     entry.note = fNote.value.trim();
+    entry.group = modalGroup;
   } else {
-    state.history.push({id: uid(), siteId: fSite.value, type: modalType, ts, note: fNote.value.trim(), seq: state.nextSeq++});
+    state.history.push({id: uid(), siteId: fSite.value, type: modalType, ts, note: fNote.value.trim(), seq: state.nextSeq++, group: modalGroup});
   }
   saveState();
   closeModal();
@@ -645,17 +1104,238 @@ btnDeleteEntry.addEventListener("click", ()=>{
   }
 });
 
+// --- medications: config (add/edit/delete a medication definition) -----
+
+const medConfigOverlay = document.getElementById("medConfigOverlay");
+const mcName = document.getElementById("mcName");
+const mcInterval = document.getElementById("mcInterval");
+const mcMode = document.getElementById("mcMode");
+const mcAfterFields = document.getElementById("mcAfterFields");
+const mcAfterSyringe = document.getElementById("mcAfterSyringe");
+const mcOffset = document.getElementById("mcOffset");
+const mcDelete = document.getElementById("mcDelete");
+let editingMedId = null;
+
+mcMode.addEventListener("change", ()=>{
+  mcAfterFields.style.display = mcMode.value === "afterSyringe" ? "grid" : "none";
+});
+
+function openMedConfig(medId){
+  editingMedId = medId || null;
+  const med = editingMedId ? state.medications.find(m=>m.id===editingMedId) : null;
+  document.getElementById("medConfigTitle").textContent = editingMedId ? "Medikament bearbeiten" : "Medikament hinzufügen";
+  mcName.value = med ? med.name : "";
+  mcInterval.value = med ? med.intervalDays : 7;
+  mcMode.value = med ? med.mode : "interval";
+  mcAfterFields.style.display = mcMode.value === "afterSyringe" ? "grid" : "none";
+  mcAfterSyringe.innerHTML = [1,2].filter(idx=>state.settings.syringes[idx-1].enabled)
+    .map(idx=>`<option value="${idx}">${escapeHtml(syringeName(idx))}</option>`).join("") || `<option value="">Keine Spritze aktiv</option>`;
+  mcAfterSyringe.value = med && med.afterSyringe ? String(med.afterSyringe) : (mcAfterSyringe.options[0]?mcAfterSyringe.options[0].value:"");
+  mcOffset.value = med && Number.isFinite(med.offsetDays) ? med.offsetDays : 1;
+  mcDelete.style.display = editingMedId ? "inline-block" : "none";
+  medConfigOverlay.style.display = "flex";
+}
+
+document.getElementById("btnAddMed").addEventListener("click", ()=>openMedConfig(null));
+document.getElementById("mcCancel").addEventListener("click", ()=>{ medConfigOverlay.style.display="none"; });
+medConfigOverlay.addEventListener("click", e=>{ if(e.target===medConfigOverlay) medConfigOverlay.style.display="none"; });
+
+document.getElementById("mcSave").addEventListener("click", ()=>{
+  const name = mcName.value.trim();
+  if(!name){ alert("Bitte einen Namen angeben."); return; }
+  const intervalDays = parseInt(mcInterval.value,10) || 7;
+  const mode = mcMode.value;
+  const afterSyringe = mode==="afterSyringe" ? (parseInt(mcAfterSyringe.value,10) || null) : null;
+  const offsetDays = mode==="afterSyringe" ? (parseInt(mcOffset.value,10) || 0) : null;
+  if(editingMedId){
+    const med = state.medications.find(m=>m.id===editingMedId);
+    Object.assign(med, {name, intervalDays, mode, afterSyringe, offsetDays});
+  } else {
+    state.medications.push({id: uid(), name, intervalDays, mode, afterSyringe, offsetDays});
+  }
+  saveState();
+  medConfigOverlay.style.display = "none";
+  renderAll();
+});
+
+mcDelete.addEventListener("click", ()=>{
+  if(!editingMedId) return;
+  if(confirm("Dieses Medikament inkl. Konfiguration löschen? Bereits protokollierte Einnahmen bleiben im Protokoll erhalten.")){
+    state.medications = state.medications.filter(m=>m.id!==editingMedId);
+    saveState();
+    medConfigOverlay.style.display = "none";
+    renderAll();
+  }
+});
+
+// --- medications: intake logging & entry editing ------------------------
+
+function medGateInfo(med){
+  let last = null;
+  for(const e of state.medHistory){
+    if(e.medId===med.id && (!last || e.seq>last.seq)) last = e;
+  }
+  if(!last) return {blocked:false};
+  const days = daysSince(last.ts);
+  if(days < med.intervalDays){
+    return {blocked:true, days, lastTs:last.ts, nextTs: last.ts + med.intervalDays*86400000};
+  }
+  return {blocked:false, lastTs:last.ts};
+}
+
+function medDueHint(med){
+  if(med.mode !== "afterSyringe" || !med.afterSyringe) return null;
+  let last = null;
+  for(const e of state.history){
+    if(e.type==="injektion" && e.group===med.afterSyringe && (!last || e.seq>last.seq)) last = e;
+  }
+  if(!last) return null;
+  const dueTs = last.ts + (med.offsetDays||0)*86400000;
+  return {dueTs, sourceTs:last.ts};
+}
+
+function medName(medId){
+  const m = state.medications.find(x=>x.id===medId);
+  return m ? m.name : "(gelöscht)";
+}
+
+function renderMedications(){
+  const card = document.getElementById("medCard");
+  const historyCard = document.getElementById("medHistoryCard");
+  const show = state.settings.medicationEnabled;
+  card.style.display = show ? "" : "none";
+  historyCard.style.display = show ? "" : "none";
+  if(!show) return;
+
+  const list = document.getElementById("medList");
+  if(!state.medications.length){
+    list.innerHTML = `<div class="empty">Noch kein Medikament angelegt.</div>`;
+  } else {
+    list.innerHTML = "";
+    for(const med of state.medications){
+      const gate = medGateInfo(med);
+      const due = medDueHint(med);
+      const div = document.createElement("div");
+      div.className = "med-item";
+      let modeText = med.mode==="afterSyringe"
+        ? `${med.offsetDays} Tag(e) nach ${escapeHtml(syringeName(med.afterSyringe))}`
+        : `alle ${med.intervalDays} Tage`;
+      let statusText = "";
+      if(gate.lastTs) statusText += `Zuletzt eingenommen: ${formatDate(gate.lastTs)}. `;
+      if(due) statusText += `Nächste Einnahme fällig ab ${formatDate(due.dueTs)}.`;
+      div.innerHTML = `
+        <div class="med-head">
+          <div>
+            <div class="med-name">${escapeHtml(med.name)}</div>
+            <div class="med-meta">${modeText} · Mindestabstand ${med.intervalDays} Tage</div>
+          </div>
+          <div class="actions-cell">
+            <button class="btn small" data-act="edit">Bearbeiten</button>
+          </div>
+        </div>
+        ${statusText ? `<div class="med-status">${statusText}</div>` : ""}
+        ${gate.blocked ? `<div class="warn">⚠ Mindestabstand von ${med.intervalDays} Tagen noch nicht erreicht — nächste Einnahme frühestens am ${formatDate(gate.nextTs)}.</div>` : ""}
+        <div class="actions">
+          <button class="btn primary small" data-act="log" ${gate.blocked?"disabled":""}>Einnahme eintragen</button>
+        </div>
+      `;
+      div.querySelector('[data-act="edit"]').addEventListener("click", ()=>openMedConfig(med.id));
+      const logBtn = div.querySelector('[data-act="log"]');
+      if(logBtn) logBtn.addEventListener("click", ()=>{ if(!gate.blocked) quickMedLog(med.id); });
+      list.appendChild(div);
+    }
+  }
+
+  renderMedHistory();
+}
+
+function quickMedLog(medId){
+  const ts = Math.floor(Date.now() / 60000) * 60000;
+  state.medHistory.push({id: uid(), medId, ts, note:"", seq: state.nextMedSeq++});
+  saveState();
+  renderAll();
+}
+
+function renderMedHistory(){
+  const body = document.getElementById("medHistoryBody");
+  const empty = document.getElementById("medHistoryEmpty");
+  const rows = [...state.medHistory].sort((a,b)=>b.seq - a.seq);
+  body.innerHTML = "";
+  empty.style.display = rows.length ? "none" : "block";
+  for(const e of rows){
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${formatDateTime(e.ts)}</td>
+      <td>${escapeHtml(medName(e.medId))}</td>
+      <td>${e.note ? escapeHtml(e.note) : ""}</td>
+      <td class="actions-cell"><button class="btn small" data-act="edit">Bearbeiten</button></td>
+    `;
+    tr.querySelector('[data-act="edit"]').addEventListener("click", ()=>openMedEntry(e.id));
+    body.appendChild(tr);
+  }
+}
+
+const medEntryOverlay = document.getElementById("medEntryOverlay");
+const meDate = document.getElementById("meDate");
+const meTime = document.getElementById("meTime");
+const meNote = document.getElementById("meNote");
+let editingMedEntryId = null;
+
+function openMedEntry(entryId){
+  editingMedEntryId = entryId;
+  const entry = state.medHistory.find(e=>e.id===entryId);
+  if(!entry) return;
+  const d = new Date(entry.ts);
+  meDate.value = toDateInput(d);
+  meTime.value = toTimeInput(d);
+  meNote.value = entry.note || "";
+  medEntryOverlay.style.display = "flex";
+}
+
+document.getElementById("meCancel").addEventListener("click", ()=>{ medEntryOverlay.style.display="none"; });
+medEntryOverlay.addEventListener("click", e=>{ if(e.target===medEntryOverlay) medEntryOverlay.style.display="none"; });
+
+document.getElementById("meSave").addEventListener("click", ()=>{
+  const entry = state.medHistory.find(e=>e.id===editingMedEntryId);
+  if(!entry) return;
+  const [y,m,d] = meDate.value.split("-").map(Number);
+  const [hh,mm] = meTime.value.split(":").map(Number);
+  const ts = new Date(y, m-1, d, hh, mm).getTime();
+  if(!Number.isFinite(ts)){ alert("Bitte gültiges Datum/Uhrzeit angeben."); return; }
+  entry.ts = ts;
+  entry.note = meNote.value.trim();
+  saveState();
+  medEntryOverlay.style.display = "none";
+  renderAll();
+});
+
+document.getElementById("meDelete").addEventListener("click", ()=>{
+  if(!editingMedEntryId) return;
+  if(confirm("Diesen Eintrag löschen?")){
+    state.medHistory = state.medHistory.filter(e=>e.id!==editingMedEntryId);
+    saveState();
+    medEntryOverlay.style.display = "none";
+    renderAll();
+  }
+});
+
 // --- init ------------------------------------------------------------
 
 function renderAll(){
   renderBody();
   renderLegend();
   renderRecommendations();
+  renderManageToggles();
+  renderSyringeCfg();
+  document.getElementById("cfgRest").value = state.settings.restDays;
+  renderSiteManage();
   renderHistory();
-  renderSettings();
+  renderMedications();
 }
 
+backfillGroups();
 if(ensureSeq()) saveState();
+saveState();
 renderAll();
 })();
 </script>

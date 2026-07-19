@@ -8,13 +8,18 @@ Einfach `index.html` im Browser öffnen (lokal per Doppelklick oder über GitHub
 
 ## Funktionen
 
-- **Körperkarte**: 12 Einstichstellen (Bauch links/rechts × 3, Oberschenkel links/rechts × 3), farblich nach Ruhezeit markiert.
-- **Automatische Empfehlung**: Für zwei Spritzen werden gleichzeitig zwei Stellen vorgeschlagen — jeweils die am längsten unbenutzte Stelle. Standardmäßig ist der Bauch für Spritze 1 und der Oberschenkel für Spritze 2 reserviert, damit beide Spritzen nicht denselben Bereich beanspruchen (in den Einstellungen abschaltbar oder vertauschbar). Zusätzlich wird wenn möglich nach jeder Injektion auch die Körperseite (links/rechts) innerhalb des jeweiligen Bereichs gewechselt.
-- **Protokoll**: Jede Injektion wird mit Datum/Uhrzeit gespeichert und in einer Tabelle aufgelistet.
-- **Überspringen**: Eine vorgeschlagene Stelle kann übersprungen werden — sie gilt dann als "berührt" und rutscht ans Ende der Rotation, ohne als tatsächliche Injektion gezählt zu werden.
-- **Überschreiben/Bearbeiten**: Jede beliebige Stelle kann manuell ausgewählt werden (unabhängig vom Vorschlag), und jeder Protokolleintrag lässt sich nachträglich bearbeiten oder löschen.
-- **Export/Import**: Die Daten lassen sich als JSON-Datei sichern und wieder einspielen.
+- **Körperkarte**: anatomisch orientierte SVG-Silhouette mit 12 Einstichstellen (Bauch links/rechts × 3, Oberschenkel links/rechts × 3), farblich nach Ruhezeit markiert. Zeigt außerdem die Bauchnabel-Sperrzone als Referenz.
+- **Zwei individuell konfigurierbare Spritzen**: jede Spritze bekommt einen eigenen Namen (z.&nbsp;B. "MTX", "Hyrimoz"), einen frei wählbaren Bereich (Bauch / Oberschenkel / beide) und ein eigenes Injektionsintervall (Mindestabstand in Tagen). "Injektion eintragen" ist gesperrt, solange der Mindestabstand nicht erreicht ist — inklusive Hinweistext, ab wann die nächste Injektion frühestens fällig ist.
+- **Temporäre Bereichsnutzung**: eine Stelle kann im Protokollier-Dialog bewusst der jeweils anderen Spritze zugeordnet werden (z.&nbsp;B. wenn eine Zone ausnahmsweise mitbenutzt wird). Die Stelle rutscht dadurch automatisch ans Ende ihrer eigenen Rotation, unabhängig davon, welche Spritze sie genutzt hat.
+- **Was verwalten**: Spritze 1, Spritze 2 und der Medikamenten-Tracker lassen sich einzeln ein-/ausblenden — z.&nbsp;B. nur eine Spritze, zwei Spritzen, oder zusätzlich ein Medikament.
+- **Automatische Empfehlung**: pro aktiver Spritze wird die am längsten unbenutzte Stelle im jeweiligen Bereich vorgeschlagen, inklusive automatischem Seitenwechsel (links/rechts) wenn möglich.
+- **Medikamenten-Tracker**: für Medikamente mit festem Einnahme-Rhythmus (z.&nbsp;B. Folsäure, die typischerweise einen Tag nach MTX genommen wird). Pro Medikament: Name, Mindestabstand zwischen Einnahmen, wahlweise fester Abstand oder "X Tage nach Spritze Y". "Einnahme eintragen" ist ebenfalls durch den Mindestabstand gesperrt, mit Hinweistext.
+- **Einstichstellen dauerhaft deaktivieren**: einzelne Stellen (z.&nbsp;B. wegen Narbe/Verhärtung) lassen sich dauerhaft aus der Rotation herausnehmen — sie werden nie mehr vorgeschlagen und erscheinen ausgegraut auf der Körperkarte.
+- **Protokoll**: jede Injektion/Einnahme wird mit Datum/Uhrzeit gespeichert und in einer Tabelle aufgelistet.
+- **Überspringen**: eine vorgeschlagene Stelle kann übersprungen werden — sie gilt dann als "berührt" und rutscht ans Ende der Rotation, ohne als tatsächliche Injektion gezählt zu werden.
+- **Überschreiben/Bearbeiten**: jede beliebige Stelle kann manuell ausgewählt werden (unabhängig vom Vorschlag), und jeder Protokolleintrag lässt sich nachträglich bearbeiten oder löschen.
+- **Export/Import**: die Daten lassen sich als JSON-Datei sichern und wieder einspielen.
 
 ## Hinweis
 
-Dieses Tool dient nur der persönlichen Organisation der Einstichstellen-Rotation. Es ersetzt keine medizinische Beratung — allgemeine Empfehlungen zu Mindestabständen zwischen Injektionen an derselben Stelle bitte mit Arzt/Ärztin oder Packungsbeilage abstimmen.
+Dieses Tool dient nur der persönlichen Organisation der Einstichstellen-Rotation. Es ersetzt keine medizinische Beratung — die im Tool angegebenen allgemeinen Abstände (z.&nbsp;B. 5&nbsp;cm um den Bauchnabel) stammen aus öffentlichen Packungsbeilagen/Fachinformationen gängiger Fertigspritzen und ersetzen nicht die Anleitung deines konkreten Präparats oder die Rücksprache mit Arzt/Ärztin oder Apotheke.
