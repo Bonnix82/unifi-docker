@@ -118,6 +118,8 @@ details.info-card summary::-webkit-details-marker{display:none;}
 details.info-card summary:before{content:"▸";display:inline-block;transition:transform .15s;color:var(--muted);}
 details.info-card[open] summary:before{transform:rotate(90deg);}
 details.info-card > *:not(summary){margin-top:10px;}
+.demo-banner{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;background:color-mix(in srgb, var(--accent3) 16%, transparent);border:1px solid var(--accent3);color:var(--accent3);border-radius:10px;padding:9px 12px;font-size:.82rem;margin-bottom:16px;}
+.demo-banner .btn{flex:none;border-color:var(--accent3);color:var(--accent3);}
 
 /* history table */
 table{width:100%;border-collapse:collapse;font-size:.82rem;}
@@ -127,6 +129,7 @@ tr:last-child td{border-bottom:none;}
 .type-pill{padding:2px 8px;border-radius:999px;font-size:.72rem;font-weight:600;white-space:nowrap;}
 .type-inj{background:color-mix(in srgb, var(--ok) 18%, transparent);color:var(--ok);}
 .type-skip{background:color-mix(in srgb, var(--muted) 20%, transparent);color:var(--muted);}
+.type-demo{background:color-mix(in srgb, var(--accent3) 20%, transparent);color:var(--accent3);margin-left:4px;}
 .empty{color:var(--muted);font-size:.85rem;padding:10px 0;text-align:center;}
 .actions-cell{display:flex;gap:6px;}
 .tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
@@ -168,6 +171,11 @@ tr:last-child td{border-bottom:none;}
       <p class="sub">Rotation für Bauch &amp; Oberschenkel · empfiehlt automatisch die am längsten unbenutzte Stelle</p>
     </div>
     <button class="btn" id="btnOpenSettings" style="flex:none;">⚙️ Einstellungen</button>
+  </div>
+
+  <div class="demo-banner" id="demoBanner" style="display:none;">
+    <span>🧪 Demo-Modus aktiv — Mindestabstände werden ignoriert, neue Einträge werden im Protokoll als „Demo" markiert.</span>
+    <button type="button" class="btn small" id="btnDemoBannerOff">Demo-Modus beenden</button>
   </div>
 
   <details class="card info-card">
@@ -364,6 +372,10 @@ tr:last-child td{border-bottom:none;}
         <div>Mindest-Ruhezeit pro Einstichstelle (Tage)<br><span style="color:var(--muted);font-size:.72rem;">steuert die Farbe/Rotation der Körperkarte</span></div>
         <input type="number" id="cfgRest" min="1" max="60" style="width:64px;">
       </div>
+      <div class="row" style="margin-top:4px;">
+        <div>Demo-Modus<br><span style="color:var(--muted);font-size:.72rem;">Mindestabstände werden ignoriert, neue Einträge werden als „Demo" markiert</span></div>
+        <label class="switch"><input type="checkbox" id="cfgDemoMode"><span class="slider"></span></label>
+      </div>
     </div>
 
     <div class="tab-panel" data-panel="syr1" style="display:none;">
@@ -448,6 +460,7 @@ function defaultSettings(){
     restDays: 14,
     disabledSites: [],
     medicationEnabled: true,
+    demoMode: false,
     syringes: [
       {enabled:true, name:"Spritze 1", siteIds: zoneToSiteIds("bauch"), intervalDays:7},
       {enabled:true, name:"Spritze 2", siteIds: zoneToSiteIds("oberschenkel"), intervalDays:7}
@@ -665,10 +678,11 @@ function syringeGateInfo(idx){
   }
   if(!last) return {blocked:false};
   const days = daysSince(last.ts);
-  if(days < cfg.intervalDays){
-    return {blocked:true, days, lastTs:last.ts, nextTs: last.ts + cfg.intervalDays*86400000};
+  const nextTs = last.ts + cfg.intervalDays*86400000;
+  if(days < cfg.intervalDays && !state.settings.demoMode){
+    return {blocked:true, days, lastTs:last.ts, lastId:last.id, nextTs};
   }
-  return {blocked:false};
+  return {blocked:false, lastTs:last.ts, lastId:last.id, nextTs};
 }
 
 function relDays(days){
@@ -789,7 +803,9 @@ function renderRecommendations(){
       const st = siteStatus(site.id);
       body += `<div class="site-name">${siteName(site.id)}</div><div class="since">${relDays(st.days)}</div>`;
       if(gate.blocked){
-        body += `<div class="warn">⚠ Mindestabstand von ${cfg.intervalDays} Tagen noch nicht erreicht. Zuletzt am ${formatDate(gate.lastTs)}, nächste Injektion frühestens am ${formatDate(gate.nextTs)}.</div>`;
+        body += `<div class="warn">⚠ Mindestabstand von ${cfg.intervalDays} Tagen noch nicht erreicht. Zuletzt am ${formatDate(gate.lastTs)}, nächste Injektion frühestens am ${formatDate(gate.nextTs)}.
+          Falscher letzter Eintrag? <button type="button" class="btn small ghost" data-act="fix" style="padding:2px 7px;margin-left:4px;">Letzten Eintrag korrigieren</button>
+        </div>`;
       }
       body += `<div class="actions">
         <button class="btn primary small" data-act="log" ${gate.blocked?"disabled":""}>Injektion eintragen</button>
@@ -801,6 +817,8 @@ function renderRecommendations(){
       const logBtn = div.querySelector('[data-act="log"]');
       if(logBtn) logBtn.addEventListener("click", ()=>{ if(!gate.blocked) quickLog(site.id, "injektion", idx); });
       div.querySelector('[data-act="skip"]').addEventListener("click", ()=>{ quickLog(site.id, "uebersprungen", idx); });
+      const fixBtn = div.querySelector('[data-act="fix"]');
+      if(fixBtn) fixBtn.addEventListener("click", ()=>{ openModal({entryId: gate.lastId}); });
     }
     recRow.appendChild(div);
   }
@@ -811,7 +829,7 @@ function renderRecommendations(){
 
 function quickLog(siteId, type, group){
   const ts = Math.floor(Date.now() / 60000) * 60000; // minute precision, matches manual entries
-  state.history.push({id: uid(), siteId, type, ts, note: "", seq: state.nextSeq++, group: group ?? null});
+  state.history.push({id: uid(), siteId, type, ts, note: "", seq: state.nextSeq++, group: group ?? null, demo: state.settings.demoMode});
   saveState();
   renderAll();
 }
@@ -830,7 +848,7 @@ function renderHistory(){
     tr.innerHTML = `
       <td>${formatDateTime(e.ts)}</td>
       <td>${siteName(e.siteId)}</td>
-      <td><span class="type-pill ${e.type==='injektion'?'type-inj':'type-skip'}">${e.type==='injektion'?'Injektion':'Übersprungen'}</span></td>
+      <td><span class="type-pill ${e.type==='injektion'?'type-inj':'type-skip'}">${e.type==='injektion'?'Injektion':'Übersprungen'}</span>${e.demo?'<span class="type-pill type-demo">Demo</span>':''}</td>
       <td>${e.group ? escapeHtml(syringeName(e.group)) : "–"}</td>
       <td>${e.note ? escapeHtml(e.note) : ""}</td>
       <td class="actions-cell"><button class="btn small" data-act="edit">Bearbeiten</button></td>
@@ -852,6 +870,7 @@ function renderManageToggles(){
   document.getElementById("cfgSyr1Enabled").checked = state.settings.syringes[0].enabled;
   document.getElementById("cfgSyr2Enabled").checked = state.settings.syringes[1].enabled;
   document.getElementById("cfgMedEnabled").checked = state.settings.medicationEnabled;
+  document.getElementById("cfgDemoMode").checked = state.settings.demoMode;
 }
 document.getElementById("cfgSyr1Enabled").addEventListener("change", e=>{
   state.settings.syringes[0].enabled = e.target.checked; saveState(); renderAll();
@@ -862,6 +881,16 @@ document.getElementById("cfgSyr2Enabled").addEventListener("change", e=>{
 document.getElementById("cfgMedEnabled").addEventListener("change", e=>{
   state.settings.medicationEnabled = e.target.checked; saveState(); renderAll();
 });
+document.getElementById("cfgDemoMode").addEventListener("change", e=>{
+  state.settings.demoMode = e.target.checked; saveState(); renderAll();
+});
+document.getElementById("btnDemoBannerOff").addEventListener("click", ()=>{
+  state.settings.demoMode = false; saveState(); renderAll();
+});
+
+function renderDemoBanner(){
+  document.getElementById("demoBanner").style.display = state.settings.demoMode ? "flex" : "none";
+}
 
 // --- rendering: per-syringe settings -----------------------------------
 
@@ -1202,7 +1231,7 @@ btnSave.addEventListener("click", ()=>{
     entry.note = fNote.value.trim();
     entry.group = modalGroup;
   } else {
-    state.history.push({id: uid(), siteId: fSite.value, type: modalType, ts, note: fNote.value.trim(), seq: state.nextSeq++, group: modalGroup});
+    state.history.push({id: uid(), siteId: fSite.value, type: modalType, ts, note: fNote.value.trim(), seq: state.nextSeq++, group: modalGroup, demo: state.settings.demoMode});
   }
   saveState();
   closeModal();
@@ -1292,10 +1321,11 @@ function medGateInfo(med){
   }
   if(!last) return {blocked:false};
   const days = daysSince(last.ts);
-  if(days < med.intervalDays){
-    return {blocked:true, days, lastTs:last.ts, nextTs: last.ts + med.intervalDays*86400000};
+  const nextTs = last.ts + med.intervalDays*86400000;
+  if(days < med.intervalDays && !state.settings.demoMode){
+    return {blocked:true, days, lastTs:last.ts, lastId:last.id, nextTs};
   }
-  return {blocked:false, lastTs:last.ts};
+  return {blocked:false, lastTs:last.ts, lastId:last.id, nextTs};
 }
 
 function medDueHint(med){
@@ -1349,7 +1379,9 @@ function renderMedications(){
           </div>
         </div>
         ${statusText ? `<div class="med-status">${statusText}</div>` : ""}
-        ${gate.blocked ? `<div class="warn">⚠ Mindestabstand von ${med.intervalDays} Tagen noch nicht erreicht — nächste Einnahme frühestens am ${formatDate(gate.nextTs)}.</div>` : ""}
+        ${gate.blocked ? `<div class="warn">⚠ Mindestabstand von ${med.intervalDays} Tagen noch nicht erreicht — nächste Einnahme frühestens am ${formatDate(gate.nextTs)}.
+          Falscher letzter Eintrag? <button type="button" class="btn small ghost" data-act="fix" style="padding:2px 7px;margin-left:4px;">Letzten Eintrag korrigieren</button>
+        </div>` : ""}
         <div class="actions">
           <button class="btn primary small" data-act="log" ${gate.blocked?"disabled":""}>Einnahme eintragen</button>
         </div>
@@ -1357,6 +1389,8 @@ function renderMedications(){
       div.querySelector('[data-act="edit"]').addEventListener("click", ()=>openMedConfig(med.id));
       const logBtn = div.querySelector('[data-act="log"]');
       if(logBtn) logBtn.addEventListener("click", ()=>{ if(!gate.blocked) quickMedLog(med.id); });
+      const fixBtn = div.querySelector('[data-act="fix"]');
+      if(fixBtn) fixBtn.addEventListener("click", ()=>openMedEntry(gate.lastId));
       list.appendChild(div);
     }
   }
@@ -1366,7 +1400,7 @@ function renderMedications(){
 
 function quickMedLog(medId){
   const ts = Math.floor(Date.now() / 60000) * 60000;
-  state.medHistory.push({id: uid(), medId, ts, note:"", seq: state.nextMedSeq++});
+  state.medHistory.push({id: uid(), medId, ts, note:"", seq: state.nextMedSeq++, demo: state.settings.demoMode});
   saveState();
   renderAll();
 }
@@ -1381,7 +1415,7 @@ function renderMedHistory(){
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${formatDateTime(e.ts)}</td>
-      <td>${escapeHtml(medName(e.medId))}</td>
+      <td>${escapeHtml(medName(e.medId))}${e.demo?' <span class="type-pill type-demo">Demo</span>':''}</td>
       <td>${e.note ? escapeHtml(e.note) : ""}</td>
       <td class="actions-cell"><button class="btn small" data-act="edit">Bearbeiten</button></td>
     `;
@@ -1437,6 +1471,7 @@ document.getElementById("meDelete").addEventListener("click", ()=>{
 // --- init ------------------------------------------------------------
 
 function renderAll(){
+  renderDemoBanner();
   renderBody();
   renderLegend();
   renderRecommendations();

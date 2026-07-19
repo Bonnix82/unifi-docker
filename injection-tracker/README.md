@@ -20,6 +20,8 @@ Alle Konfiguration (Spritzen, Bereiche, Intervalle, Einstichstellen verwalten, E
 - **Protokoll**: jede Injektion/Einnahme wird mit Datum/Uhrzeit gespeichert und in einer Tabelle aufgelistet.
 - **Überspringen**: eine vorgeschlagene Stelle kann übersprungen werden — sie gilt dann als "berührt" und rutscht ans Ende der Rotation, ohne als tatsächliche Injektion gezählt zu werden.
 - **Überschreiben/Bearbeiten**: jede beliebige Stelle kann manuell ausgewählt werden (unabhängig vom Vorschlag), und jeder Protokolleintrag lässt sich nachträglich bearbeiten oder löschen.
+- **Falscher letzter Eintrag korrigieren**: sperrt der Mindestabstand eine Spritze/ein Medikament aufgrund eines versehentlichen oder falschen letzten Eintrags, führt ein Link direkt in der Warnung zum Bearbeiten/Löschen dieses Eintrags — ohne erst in der Protokoll-Tabelle danach suchen zu müssen.
+- **Demo-Modus** (in den Einstellungen unter "Allgemein"): ignoriert alle Mindestabstände, damit man beliebig oft Injektionen/Einnahmen protokollieren kann, z.&nbsp;B. um die App vorzuführen oder auszuprobieren. Ein Banner erinnert daran, solange er aktiv ist; alle währenddessen angelegten Einträge werden im Protokoll mit "Demo" markiert.
 - **Export/Import**: die Daten lassen sich als JSON-Datei sichern und wieder einspielen.
 
 ## Hinweis
