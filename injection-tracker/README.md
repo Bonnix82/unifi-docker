@@ -6,11 +6,13 @@ Ein kleines, eigenständiges Web-Tool zur Rotation von Spritzen-Einstichstellen 
 
 Einfach `index.html` im Browser öffnen (lokal per Doppelklick oder über GitHub Pages/einen beliebigen Webserver). Es wird keine Internetverbindung und kein Backend benötigt — alle Daten werden lokal im Browser (`localStorage`) gespeichert.
 
+Alle Konfiguration (Spritzen, Bereiche, Intervalle, Einstichstellen verwalten, Export/Import/Reset) liegt gesammelt im Dialog hinter dem "⚙️ Einstellungen"-Button oben rechts, damit die Hauptseite übersichtlich bleibt.
+
 ## Funktionen
 
 - **Körperkarte**: anatomisch orientierte SVG-Silhouette mit 12 Einstichstellen (Bauch links/rechts × 3, Oberschenkel links/rechts × 3), farblich nach Ruhezeit markiert. Zeigt außerdem die Bauchnabel-Sperrzone als Referenz.
-- **Zwei individuell konfigurierbare Spritzen**: jede Spritze bekommt einen eigenen Namen (z.&nbsp;B. "MTX", "Hyrimoz"), einen frei wählbaren Bereich (Bauch / Oberschenkel / beide) und ein eigenes Injektionsintervall (Mindestabstand in Tagen). "Injektion eintragen" ist gesperrt, solange der Mindestabstand nicht erreicht ist — inklusive Hinweistext, ab wann die nächste Injektion frühestens fällig ist.
-- **Temporäre Bereichsnutzung**: eine Stelle kann im Protokollier-Dialog bewusst der jeweils anderen Spritze zugeordnet werden (z.&nbsp;B. wenn eine Zone ausnahmsweise mitbenutzt wird). Die Stelle rutscht dadurch automatisch ans Ende ihrer eigenen Rotation, unabhängig davon, welche Spritze sie genutzt hat.
+- **Zwei individuell konfigurierbare Spritzen**: jede Spritze bekommt einen eigenen Namen (z.&nbsp;B. "MTX", "Hyrimoz"), eine frei wählbare Liste einzelner Einstichstellen (nicht nur grob "Bauch" oder "Oberschenkel", sondern jede der 12 Stellen einzeln an-/abwählbar, inkl. Schnellauswahl "Nur Bauch"/"Nur Oberschenkel"/"Alle"/"Keine") und ein eigenes Injektionsintervall (Mindestabstand in Tagen). "Injektion eintragen" ist gesperrt, solange der Mindestabstand nicht erreicht ist — inklusive Hinweistext, ab wann die nächste Injektion frühestens fällig ist.
+- **Temporäre Bereichsnutzung**: eine Stelle kann im Protokollier-Dialog bewusst der jeweils anderen Spritze zugeordnet werden (z.&nbsp;B. wenn eine Zone ausnahmsweise mitbenutzt wird), auch wenn sie nicht zu deren regulär zugeordneten Stellen gehört. Die Stelle rutscht dadurch automatisch ans Ende ihrer eigenen Rotation, unabhängig davon, welche Spritze sie genutzt hat.
 - **Was verwalten**: Spritze 1, Spritze 2 und der Medikamenten-Tracker lassen sich einzeln ein-/ausblenden — z.&nbsp;B. nur eine Spritze, zwei Spritzen, oder zusätzlich ein Medikament.
 - **Automatische Empfehlung**: pro aktiver Spritze wird die am längsten unbenutzte Stelle im jeweiligen Bereich vorgeschlagen, inklusive automatischem Seitenwechsel (links/rechts) wenn möglich.
 - **Medikamenten-Tracker**: für Medikamente mit festem Einnahme-Rhythmus (z.&nbsp;B. Folsäure, die typischerweise einen Tag nach MTX genommen wird). Pro Medikament: Name, Mindestabstand zwischen Einnahmen, wahlweise fester Abstand oder "X Tage nach Spritze Y". "Einnahme eintragen" ist ebenfalls durch den Mindestabstand gesperrt, mit Hinweistext.

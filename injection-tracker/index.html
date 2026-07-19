@@ -101,6 +101,24 @@ select,input[type=number],input[type=text]{background:var(--card);color:var(--te
 .cfg-grid label{font-size:.72rem;color:var(--muted);}
 .cfg-grid select, .cfg-grid input{width:100%;}
 
+/* settings dialog */
+.header-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+.settings-modal{max-width:640px;}
+.tabbar{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:16px;flex-wrap:wrap;}
+.tab-btn{background:transparent;border:none;border-bottom:2px solid transparent;padding:8px 8px;font-size:.8rem;color:var(--muted);border-radius:0;white-space:nowrap;}
+.tab-btn.active{color:var(--text);border-bottom-color:var(--accent1);font-weight:600;}
+.tab-btn:hover{border-color:var(--border);border-bottom-color:var(--accent1);}
+.site-pick-title{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;margin:12px 0 4px;}
+.site-pick-title:first-child{margin-top:0;}
+.site-pick-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px 12px;}
+.site-pick-grid label{display:flex;align-items:center;gap:6px;font-size:.82rem;padding:3px 0;}
+.site-pick-grid input[type=checkbox]{width:auto;flex:none;}
+details.info-card summary{cursor:pointer;font-weight:600;color:var(--text);list-style:none;display:flex;align-items:center;gap:8px;}
+details.info-card summary::-webkit-details-marker{display:none;}
+details.info-card summary:before{content:"▸";display:inline-block;transition:transform .15s;color:var(--muted);}
+details.info-card[open] summary:before{transform:rotate(90deg);}
+details.info-card > *:not(summary){margin-top:10px;}
+
 /* history table */
 table{width:100%;border-collapse:collapse;font-size:.82rem;}
 th,td{text-align:left;padding:7px 6px;border-bottom:1px solid var(--border);}
@@ -139,20 +157,26 @@ tr:last-child td{border-bottom:none;}
 .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px;}
 .modal-warn{color:var(--recent);font-size:.78rem;background:color-mix(in srgb, var(--recent) 12%, transparent);border-radius:8px;padding:8px 10px;margin-bottom:12px;line-height:1.4;}
 .radio-row{display:flex;align-items:center;gap:6px;margin-bottom:5px;font-size:.85rem;}
+.radio-row input[type=radio]{width:auto;flex:none;padding:0;border:none;background:none;border-radius:0;margin:0;}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>💉 Einstichstellen- &amp; Medikamenten-Tracker</h1>
-  <p class="sub">Rotation für Bauch &amp; Oberschenkel · empfiehlt automatisch die am längsten unbenutzte Stelle</p>
+  <div class="header-row">
+    <div>
+      <h1>💉 Einstichstellen- &amp; Medikamenten-Tracker</h1>
+      <p class="sub">Rotation für Bauch &amp; Oberschenkel · empfiehlt automatisch die am längsten unbenutzte Stelle</p>
+    </div>
+    <button class="btn" id="btnOpenSettings" style="flex:none;">⚙️ Einstellungen</button>
+  </div>
 
-  <div class="card info-card">
-    <h2 style="color:var(--text);">ℹ️ Allgemeine Hinweise zu Injektionsstellen</h2>
+  <details class="card info-card">
+    <summary>ℹ️ Allgemeine Hinweise zu Injektionsstellen</summary>
     <div><b>Bauch:</b> ca. 5&nbsp;cm Abstand rund um den Bauchnabel einhalten, nicht oberhalb der untersten Rippe spritzen.</div>
     <div style="margin-top:4px;"><b>Oberschenkel:</b> Vorderseite/Außenseite nutzen, ca. 5&nbsp;cm Sicherheitsabstand zu Knie und Leiste einhalten.</div>
     <div style="margin-top:4px;"><b>Rotation:</b> bei jeder Injektion die Stelle wechseln (mind. 1–2&nbsp;cm Abstand zur letzten Einstichstelle), um Hautreizungen und Verhärtungen vorzubeugen.</div>
     <div style="margin-top:6px;font-size:.75rem;">Allgemeine Angaben aus Packungsbeilagen/Fachinformationen gängiger Fertigspritzen (z.&nbsp;B. Methotrexat, Adalimumab-Präparate). Ersetzt keine ärztliche Beratung oder die Anleitung deines konkreten Präparats.</div>
-  </div>
+  </details>
 
   <div class="grid">
     <!-- LEFT: body map -->
@@ -176,43 +200,6 @@ tr:last-child td{border-bottom:none;}
         <div class="tools">
           <button class="btn small" id="btnAddMed">+ Medikament hinzufügen</button>
         </div>
-      </div>
-
-      <div class="card">
-        <h2>Was möchtest du verwalten?</h2>
-        <div class="row">
-          <div>Spritze 1</div>
-          <label class="switch"><input type="checkbox" id="cfgSyr1Enabled"><span class="slider"></span></label>
-        </div>
-        <div class="row">
-          <div>Spritze 2</div>
-          <label class="switch"><input type="checkbox" id="cfgSyr2Enabled"><span class="slider"></span></label>
-        </div>
-        <div class="row">
-          <div>Medikamenten-Tracker (z.&nbsp;B. Folsäure)</div>
-          <label class="switch"><input type="checkbox" id="cfgMedEnabled"><span class="slider"></span></label>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2>Einstellungen</h2>
-        <div id="syringeCfgList"></div>
-        <div class="row" style="margin-top:4px;">
-          <div>Mindest-Ruhezeit pro Einstichstelle (Tage)<br><span style="color:var(--muted);font-size:.72rem;">steuert die Farbe/Rotation der Körperkarte</span></div>
-          <input type="number" id="cfgRest" min="1" max="60" style="width:64px;">
-        </div>
-        <div class="tools">
-          <button class="btn small" id="btnExport">Export (JSON)</button>
-          <button class="btn small" id="btnImport">Import (JSON)</button>
-          <input type="file" id="fileImport" accept="application/json" style="display:none;">
-          <button class="btn small danger" id="btnReset">Alle Daten löschen</button>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2>Einstichstellen verwalten</h2>
-        <p class="sub" style="margin:-4px 0 10px;">Dauerhaft deaktivierte Stellen werden nie mehr empfohlen.</p>
-        <div id="siteManageList"></div>
       </div>
 
       <div class="card">
@@ -348,6 +335,65 @@ tr:last-child td{border-bottom:none;}
   </div>
 </div>
 
+<!-- settings dialog -->
+<div class="overlay" id="settingsOverlay" style="display:none;">
+  <div class="modal settings-modal">
+    <h3>Einstellungen</h3>
+    <div class="tabbar">
+      <button type="button" class="tab-btn active" data-tab="general">Allgemein</button>
+      <button type="button" class="tab-btn" data-tab="syr1">Spritze 1</button>
+      <button type="button" class="tab-btn" data-tab="syr2">Spritze 2</button>
+      <button type="button" class="tab-btn" data-tab="sites">Einstichstellen</button>
+      <button type="button" class="tab-btn" data-tab="data">Daten</button>
+    </div>
+
+    <div class="tab-panel" data-panel="general">
+      <div class="row">
+        <div>Spritze 1</div>
+        <label class="switch"><input type="checkbox" id="cfgSyr1Enabled"><span class="slider"></span></label>
+      </div>
+      <div class="row">
+        <div>Spritze 2</div>
+        <label class="switch"><input type="checkbox" id="cfgSyr2Enabled"><span class="slider"></span></label>
+      </div>
+      <div class="row">
+        <div>Medikamenten-Tracker (z.&nbsp;B. Folsäure)</div>
+        <label class="switch"><input type="checkbox" id="cfgMedEnabled"><span class="slider"></span></label>
+      </div>
+      <div class="row" style="margin-top:4px;">
+        <div>Mindest-Ruhezeit pro Einstichstelle (Tage)<br><span style="color:var(--muted);font-size:.72rem;">steuert die Farbe/Rotation der Körperkarte</span></div>
+        <input type="number" id="cfgRest" min="1" max="60" style="width:64px;">
+      </div>
+    </div>
+
+    <div class="tab-panel" data-panel="syr1" style="display:none;">
+      <div id="syrTab1"></div>
+    </div>
+
+    <div class="tab-panel" data-panel="syr2" style="display:none;">
+      <div id="syrTab2"></div>
+    </div>
+
+    <div class="tab-panel" data-panel="sites" style="display:none;">
+      <p class="sub" style="margin:0 0 10px;">Dauerhaft deaktivierte Stellen werden nie mehr empfohlen, unabhängig von der Zuordnung.</p>
+      <div id="siteManageList"></div>
+    </div>
+
+    <div class="tab-panel" data-panel="data" style="display:none;">
+      <div class="tools" style="margin-top:0;">
+        <button class="btn small" id="btnExport">Export (JSON)</button>
+        <button class="btn small" id="btnImport">Import (JSON)</button>
+        <input type="file" id="fileImport" accept="application/json" style="display:none;">
+        <button class="btn small danger" id="btnReset">Alle Daten löschen</button>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn primary" id="btnCloseSettings">Fertig</button>
+    </div>
+  </div>
+</div>
+
 <script>
 (function(){
 "use strict";
@@ -384,16 +430,34 @@ function uid(){
   return (crypto.randomUUID ? crypto.randomUUID() : "id-"+Date.now()+"-"+Math.random().toString(16).slice(2));
 }
 
+function zoneToSiteIds(zone){
+  if(zone==="bauch") return SITES.filter(s=>s.zone==="bauch").map(s=>s.id);
+  if(zone==="oberschenkel") return SITES.filter(s=>s.zone==="oberschenkel").map(s=>s.id);
+  return SITES.map(s=>s.id); // "beide" / unbekannt -> alle
+}
+
 function defaultSettings(){
   return {
     restDays: 14,
     disabledSites: [],
     medicationEnabled: true,
     syringes: [
-      {enabled:true, name:"Spritze 1", zone:"bauch", intervalDays:7},
-      {enabled:true, name:"Spritze 2", zone:"oberschenkel", intervalDays:7}
+      {enabled:true, name:"Spritze 1", siteIds: zoneToSiteIds("bauch"), intervalDays:7},
+      {enabled:true, name:"Spritze 2", siteIds: zoneToSiteIds("oberschenkel"), intervalDays:7}
     ]
   };
+}
+
+// Ältere Versionen kannten nur einen groben Bereich (cfg.zone) statt der
+// individuellen Stellen-Liste (cfg.siteIds). Bestehende/ importierte Daten
+// werden beim Laden auf das neue Format angehoben.
+function ensureSyringeSiteIds(settings){
+  settings.syringes.forEach((cfg,i)=>{
+    if(!Array.isArray(cfg.siteIds)){
+      cfg.siteIds = zoneToSiteIds(cfg.zone || (i===0?"bauch":"oberschenkel"));
+    }
+    delete cfg.zone;
+  });
 }
 
 function defaultState(){
@@ -412,13 +476,13 @@ function migrateSettingsV1(oldSettings){
   const s = defaultSettings();
   if(!oldSettings) return s;
   if(typeof oldSettings.restDays === "number") s.restDays = oldSettings.restDays;
+  let zone1 = "beide", zone2 = "beide";
   if(oldSettings.reserve){
-    s.syringes[0].zone = oldSettings.swap ? "oberschenkel" : "bauch";
-    s.syringes[1].zone = oldSettings.swap ? "bauch" : "oberschenkel";
-  } else {
-    s.syringes[0].zone = "beide";
-    s.syringes[1].zone = "beide";
+    zone1 = oldSettings.swap ? "oberschenkel" : "bauch";
+    zone2 = oldSettings.swap ? "bauch" : "oberschenkel";
   }
+  s.syringes[0].siteIds = zoneToSiteIds(zone1);
+  s.syringes[1].siteIds = zoneToSiteIds(zone2);
   return s;
 }
 
@@ -465,10 +529,11 @@ function loadState(){
       const s = Object.assign(defaultState(), parsed, {
         settings: Object.assign(defaultSettings(), parsed.settings||{}, {
           syringes: (parsed.settings && Array.isArray(parsed.settings.syringes) && parsed.settings.syringes.length===2)
-            ? parsed.settings.syringes.map((cfg,i)=>Object.assign({enabled:true,name:`Spritze ${i+1}`,zone:i===0?"bauch":"oberschenkel",intervalDays:7}, cfg))
+            ? parsed.settings.syringes.map((cfg,i)=>Object.assign({enabled:true,name:`Spritze ${i+1}`,intervalDays:7}, cfg))
             : defaultSettings().syringes
         })
       });
+      ensureSyringeSiteIds(s.settings);
       return s;
     }
     const oldRaw = localStorage.getItem(OLD_STORAGE_KEY);
@@ -531,7 +596,7 @@ function siteStatus(siteId){
 function syringesForSite(site){
   const res = [];
   state.settings.syringes.forEach((cfg,i)=>{
-    if(cfg.enabled && (cfg.zone==="beide" || cfg.zone===site.zone)) res.push(i+1);
+    if(cfg.enabled && cfg.siteIds.includes(site.id)) res.push(i+1);
   });
   return res;
 }
@@ -544,7 +609,7 @@ function syringeName(idx){
 function sitesForSyringe(idx){
   const cfg = state.settings.syringes[idx-1];
   if(!cfg || !cfg.enabled) return [];
-  return SITES.filter(s=>!isDisabled(s.id) && (cfg.zone==="beide" || cfg.zone===s.zone));
+  return SITES.filter(s=>!isDisabled(s.id) && cfg.siteIds.includes(s.id));
 }
 
 function lastUsedSide(sites){
@@ -793,59 +858,101 @@ document.getElementById("cfgMedEnabled").addEventListener("change", e=>{
 
 // --- rendering: per-syringe settings -----------------------------------
 
-function renderSyringeCfg(){
-  const el = document.getElementById("syringeCfgList");
-  el.innerHTML = "";
-  for(let idx=1; idx<=2; idx++){
-    const cfg = state.settings.syringes[idx-1];
-    if(!cfg.enabled) continue;
-    const box = document.createElement("div");
-    box.className = "syringe-cfg";
-    box.innerHTML = `
-      <div class="cfg-title">${idx===1?"Spritze 1":"Spritze 2"}</div>
-      <div class="cfg-grid">
-        <div class="field-inline">
-          <label>Name</label>
-          <input type="text" data-cfg="name" data-idx="${idx}" value="${escapeHtml(cfg.name)}">
-        </div>
-        <div class="field-inline">
-          <label>Bereich</label>
-          <select data-cfg="zone" data-idx="${idx}">
-            <option value="bauch" ${cfg.zone==='bauch'?'selected':''}>Bauch</option>
-            <option value="oberschenkel" ${cfg.zone==='oberschenkel'?'selected':''}>Oberschenkel</option>
-            <option value="beide" ${cfg.zone==='beide'?'selected':''}>Beide (kein reservierter Bereich)</option>
-          </select>
-        </div>
-        <div class="field-inline" style="grid-column:1 / -1;">
-          <label>Mindestabstand zwischen Injektionen (Tage)</label>
-          <input type="number" min="1" max="60" style="width:100px;" data-cfg="intervalDays" data-idx="${idx}" value="${cfg.intervalDays}">
-        </div>
+function sitePickRows(idx, zone){
+  const cfg = state.settings.syringes[idx-1];
+  return SITES.filter(s=>s.zone===zone).map(s=>{
+    const checked = cfg.siteIds.includes(s.id);
+    const dis = isDisabled(s.id);
+    return `<label>
+      <input type="checkbox" data-site="${s.id}" ${checked?"checked":""}>
+      ${SIDE_LABEL[s.side]} ${POS_LABEL[s.pos]}${dis?' <span class="sub" style="margin:0;display:inline;">(deaktiviert)</span>':''}
+    </label>`;
+  }).join("");
+}
+
+function renderSyringeTab(idx, container){
+  const cfg = state.settings.syringes[idx-1];
+  container.innerHTML = `
+    <div class="field">
+      <label>Name</label>
+      <input type="text" id="syrName${idx}" value="${escapeHtml(cfg.name)}">
+    </div>
+    <div class="field">
+      <label>Mindestabstand zwischen Injektionen (Tage)</label>
+      <input type="number" id="syrInterval${idx}" min="1" max="60" style="width:100px;" value="${cfg.intervalDays}">
+    </div>
+    <div class="field">
+      <label>Zugeordnete Einstichstellen (${cfg.siteIds.length} von ${SITES.length})</label>
+      <p class="sub" style="margin:-2px 0 8px;">Kann sich mit dem Bereich der anderen Spritze überschneiden — beim Protokollieren lässt sich jede Stelle bei Bedarf trotzdem der jeweils anderen Spritze zuordnen.</p>
+      <div class="tools" style="margin:0 0 8px;">
+        <button type="button" class="btn small" data-quick="bauch">Nur Bauch</button>
+        <button type="button" class="btn small" data-quick="oberschenkel">Nur Oberschenkel</button>
+        <button type="button" class="btn small" data-quick="alle">Alle</button>
+        <button type="button" class="btn small" data-quick="keine">Keine</button>
       </div>
-    `;
-    el.appendChild(box);
-  }
-  el.querySelectorAll('[data-cfg="name"]').forEach(inp=>{
-    inp.addEventListener("change", e=>{
-      const idx = parseInt(e.target.dataset.idx,10);
-      state.settings.syringes[idx-1].name = e.target.value.trim() || `Spritze ${idx}`;
+      <div class="site-pick-title">Bauch</div>
+      <div class="site-pick-grid">${sitePickRows(idx, "bauch")}</div>
+      <div class="site-pick-title">Oberschenkel</div>
+      <div class="site-pick-grid">${sitePickRows(idx, "oberschenkel")}</div>
+    </div>
+  `;
+  container.querySelector(`#syrName${idx}`).addEventListener("change", e=>{
+    state.settings.syringes[idx-1].name = e.target.value.trim() || `Spritze ${idx}`;
+    saveState(); renderAll();
+  });
+  container.querySelector(`#syrInterval${idx}`).addEventListener("change", e=>{
+    const v = parseInt(e.target.value,10);
+    state.settings.syringes[idx-1].intervalDays = (Number.isFinite(v) && v>0) ? v : 7;
+    saveState(); renderAll();
+  });
+  container.querySelectorAll("input[type=checkbox][data-site]").forEach(cb=>{
+    cb.addEventListener("change", e=>{
+      const siteId = e.target.dataset.site;
+      const ids = state.settings.syringes[idx-1].siteIds;
+      const i = ids.indexOf(siteId);
+      if(e.target.checked && i<0) ids.push(siteId);
+      if(!e.target.checked && i>=0) ids.splice(i,1);
       saveState(); renderAll();
     });
   });
-  el.querySelectorAll('[data-cfg="zone"]').forEach(sel=>{
-    sel.addEventListener("change", e=>{
-      const idx = parseInt(e.target.dataset.idx,10);
-      state.settings.syringes[idx-1].zone = e.target.value;
+  container.querySelectorAll("[data-quick]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const mode = btn.dataset.quick;
+      let ids;
+      if(mode==="bauch") ids = zoneToSiteIds("bauch");
+      else if(mode==="oberschenkel") ids = zoneToSiteIds("oberschenkel");
+      else if(mode==="alle") ids = zoneToSiteIds("beide");
+      else ids = [];
+      state.settings.syringes[idx-1].siteIds = ids;
       saveState(); renderAll();
     });
   });
-  el.querySelectorAll('[data-cfg="intervalDays"]').forEach(inp=>{
-    inp.addEventListener("change", e=>{
-      const idx = parseInt(e.target.dataset.idx,10);
-      const v = parseInt(e.target.value,10);
-      state.settings.syringes[idx-1].intervalDays = (Number.isFinite(v) && v>0) ? v : 7;
-      saveState(); renderAll();
-    });
+}
+
+// --- rendering: settings dialog (tabs) -----------------------------------
+
+const settingsOverlay = document.getElementById("settingsOverlay");
+document.getElementById("btnOpenSettings").addEventListener("click", ()=>{
+  document.querySelectorAll(".tab-btn").forEach(b=>b.classList.toggle("active", b.dataset.tab==="general"));
+  document.querySelectorAll(".tab-panel").forEach(p=>{ p.style.display = p.dataset.panel==="general" ? "" : "none"; });
+  renderSettingsDialog();
+  settingsOverlay.style.display = "flex";
+});
+document.getElementById("btnCloseSettings").addEventListener("click", ()=>{ settingsOverlay.style.display="none"; });
+settingsOverlay.addEventListener("click", e=>{ if(e.target===settingsOverlay) settingsOverlay.style.display="none"; });
+document.querySelectorAll(".tab-btn").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    document.querySelectorAll(".tab-btn").forEach(b=>b.classList.toggle("active", b===btn));
+    document.querySelectorAll(".tab-panel").forEach(p=>{ p.style.display = p.dataset.panel===btn.dataset.tab ? "" : "none"; });
   });
+});
+
+function renderSettingsDialog(){
+  renderManageToggles();
+  document.getElementById("cfgRest").value = state.settings.restDays;
+  renderSyringeTab(1, document.getElementById("syrTab1"));
+  renderSyringeTab(2, document.getElementById("syrTab2"));
+  renderSiteManage();
 }
 
 document.getElementById("cfgRest").addEventListener("change", e=>{
@@ -909,6 +1016,7 @@ document.getElementById("fileImport").addEventListener("change", e=>{
         medications: Array.isArray(parsed.medications) ? parsed.medications : [],
         medHistory: Array.isArray(parsed.medHistory) ? parsed.medHistory : []
       });
+      ensureSyringeSiteIds(state.settings);
       ensureSeq();
       backfillGroups();
       saveState();
@@ -1325,10 +1433,7 @@ function renderAll(){
   renderBody();
   renderLegend();
   renderRecommendations();
-  renderManageToggles();
-  renderSyringeCfg();
-  document.getElementById("cfgRest").value = state.settings.restDays;
-  renderSiteManage();
+  if(settingsOverlay.style.display !== "none") renderSettingsDialog();
   renderHistory();
   renderMedications();
 }
