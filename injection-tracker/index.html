@@ -419,11 +419,18 @@ const SITES = [
 const ZONE_LABEL = {bauch:"Bauch", oberschenkel:"Oberschenkel", beide:"Bauch/Oberschenkel"};
 const SIDE_LABEL = {links:"links", rechts:"rechts"};
 const POS_LABEL = {oben:"oben", mitte:"mitte", unten:"unten"};
+// Am Oberschenkel ist "oben"/"unten" ohne Bezugspunkt mehrdeutig, daher mit
+// Hüfte/Knie als Orientierung versehen. Am Bauch ist die Reihenfolge klar.
+const POS_LABEL_OBERSCHENKEL = {oben:"oben, nahe Hüfte", mitte:"mitte", unten:"unten, nahe Knie"};
+
+function posLabel(site){
+  return site.zone==="oberschenkel" ? POS_LABEL_OBERSCHENKEL[site.pos] : POS_LABEL[site.pos];
+}
 
 function siteName(id){
   const s = SITES.find(x=>x.id===id);
   if(!s) return id;
-  return `${ZONE_LABEL[s.zone]} ${SIDE_LABEL[s.side]} (${POS_LABEL[s.pos]})`;
+  return `${ZONE_LABEL[s.zone]} ${SIDE_LABEL[s.side]} (${posLabel(s)})`;
 }
 
 function uid(){
@@ -865,7 +872,7 @@ function sitePickRows(idx, zone){
     const dis = isDisabled(s.id);
     return `<label>
       <input type="checkbox" data-site="${s.id}" ${checked?"checked":""}>
-      ${SIDE_LABEL[s.side]} ${POS_LABEL[s.pos]}${dis?' <span class="sub" style="margin:0;display:inline;">(deaktiviert)</span>':''}
+      ${SIDE_LABEL[s.side]} ${posLabel(s)}${dis?' <span class="sub" style="margin:0;display:inline;">(deaktiviert)</span>':''}
     </label>`;
   }).join("");
 }
