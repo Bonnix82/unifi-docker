@@ -6,46 +6,50 @@
 <title>Einstichstellen-Tracker</title>
 <style>
 :root{
-  --bg:#f5f6f8; --card:#ffffff; --text:#1b1e24; --muted:#6b7280; --border:#e2e5ea;
-  --accent1:#2f7ed8; --accent2:#8a4fd8; --accent3:#c2792f;
-  --ok:#2f9e56; --soon:#d3a025; --recent:#d64545; --unused:#3f7fd6; --disabled:#9aa1ad;
-  --shadow:0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
+  --bg:#f3f5f8; --card:#ffffff; --card-raised:#fbfcfe; --text:#181c24; --muted:#667088; --border:#dfe3ea;
+  --accent1:#2569c4; --accent2:#7c4fd0; --accent3:#b8681f;
+  --ok:#238354; --soon:#b3820f; --recent:#c43e3e; --unused:#3f7fd6; --disabled:#98a1b3;
+  --shadow:0 1px 2px rgba(23,28,42,.05), 0 4px 14px rgba(23,28,42,.06);
+  --font-ui:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
 }
 @media (prefers-color-scheme: dark){
   :root{
-    --bg:#14161a; --card:#1d2026; --text:#e7e9ee; --muted:#9aa1ad; --border:#2b2f37;
-    --accent1:#5b9ce6; --accent2:#b48cf0; --accent3:#e0a15c;
-    --ok:#4cbf7a; --soon:#e3b94a; --recent:#e5695f; --unused:#6ba3ec; --disabled:#6b7280;
-    --shadow:0 1px 3px rgba(0,0,0,.4), 0 1px 2px rgba(0,0,0,.3);
+    --bg:#12141a; --card:#1a1d24; --card-raised:#1f232b; --text:#e9ebf2; --muted:#98a1b8; --border:#2a2f3a;
+    --accent1:#6ba2ea; --accent2:#b592ee; --accent3:#e3a768;
+    --ok:#4bc386; --soon:#e0bd52; --recent:#e87a72; --unused:#6ba3ec; --disabled:#6b7488;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 4px 16px rgba(0,0,0,.28);
   }
 }
 :root[data-theme="dark"]{
-  --bg:#14161a; --card:#1d2026; --text:#e7e9ee; --muted:#9aa1ad; --border:#2b2f37;
-  --accent1:#5b9ce6; --accent2:#b48cf0; --accent3:#e0a15c;
-  --ok:#4cbf7a; --soon:#e3b94a; --recent:#e5695f; --unused:#6ba3ec; --disabled:#6b7280;
+  --bg:#12141a; --card:#1a1d24; --card-raised:#1f232b; --text:#e9ebf2; --muted:#98a1b8; --border:#2a2f3a;
+  --accent1:#6ba2ea; --accent2:#b592ee; --accent3:#e3a768;
+  --ok:#4bc386; --soon:#e0bd52; --recent:#e87a72; --unused:#6ba3ec; --disabled:#6b7488;
 }
 :root[data-theme="light"]{
-  --bg:#f5f6f8; --card:#ffffff; --text:#1b1e24; --muted:#6b7280; --border:#e2e5ea;
-  --accent1:#2f7ed8; --accent2:#8a4fd8; --accent3:#c2792f;
-  --ok:#2f9e56; --soon:#d3a025; --recent:#d64545; --unused:#3f7fd6; --disabled:#9aa1ad;
+  --bg:#f3f5f8; --card:#ffffff; --card-raised:#fbfcfe; --text:#181c24; --muted:#667088; --border:#dfe3ea;
+  --accent1:#2569c4; --accent2:#7c4fd0; --accent3:#b8681f;
+  --ok:#238354; --soon:#b3820f; --recent:#c43e3e; --unused:#3f7fd6; --disabled:#98a1b3;
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
-.wrap{max-width:1040px;margin:0 auto;padding:16px 16px 64px;}
-h1{font-size:1.25rem;margin:8px 0 4px;}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font-ui);-webkit-font-smoothing:antialiased;}
+.wrap{max-width:1040px;margin:0 auto;padding:20px 16px 64px;}
+h1{font-size:1.3rem;font-weight:700;letter-spacing:-.01em;margin:8px 0 4px;text-wrap:balance;}
 .sub{color:var(--muted);font-size:.85rem;margin:0 0 16px;}
 .grid{display:grid;grid-template-columns:300px 1fr;gap:16px;align-items:start;}
 @media (max-width:760px){.grid{grid-template-columns:1fr;}}
-.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;box-shadow:var(--shadow);}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;box-shadow:var(--shadow);}
 .card + .card{margin-top:16px;}
-.card h2{font-size:.95rem;margin:0 0 10px;display:flex;align-items:center;gap:8px;}
-.info-card{font-size:.8rem;line-height:1.5;color:var(--muted);}
+.card h2{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:0 0 12px;display:flex;align-items:center;gap:7px;}
+.info-card{font-size:.8rem;line-height:1.55;color:var(--muted);}
 .info-card b{color:var(--text);}
 .info-card ul{margin:6px 0;padding-left:18px;}
+:focus-visible{outline:2px solid var(--accent1);outline-offset:2px;}
+@media (prefers-reduced-motion: reduce){*{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;}}
 
 /* body diagram */
 .body-card{display:flex;flex-direction:column;align-items:center;}
-svg#bodyMap{width:100%;max-width:300px;height:auto;}
+.body-canvas{width:100%;background:var(--card-raised);border:1px solid var(--border);border-radius:12px;padding:8px;}
+svg#bodyMap{width:100%;max-width:300px;height:auto;display:block;margin:0 auto;}
 .body-outline{fill:none;stroke:var(--border);stroke-width:2.5;stroke-linejoin:round;}
 .zone-hint{fill:none;stroke:var(--muted);stroke-width:1.4;stroke-dasharray:3 4;opacity:.55;}
 .site-dot{cursor:pointer;stroke:var(--card);stroke-width:2;transition:r .1s ease;}
@@ -61,25 +65,27 @@ svg#bodyMap{width:100%;max-width:300px;height:auto;}
 /* recommendation cards */
 .rec-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 @media (max-width:520px){.rec-row{grid-template-columns:1fr;}}
-.rec-card{border-radius:12px;padding:12px;border:1px solid var(--border);}
-.rec-card .badge{display:inline-block;color:#fff;border-radius:999px;padding:2px 9px;font-size:.72rem;font-weight:600;margin-bottom:6px;}
-.rec-card .site-name{font-weight:600;font-size:1rem;margin:2px 0;}
-.rec-card .since{color:var(--muted);font-size:.82rem;margin-bottom:10px;}
+.rec-card{border-radius:12px;padding:14px;border:1px solid var(--border);}
+.rec-card .badge{display:inline-flex;align-items:center;color:#fff;border-radius:999px;padding:3px 10px;font-size:.72rem;font-weight:700;letter-spacing:.01em;margin-bottom:8px;}
+.rec-card .site-name{font-weight:700;font-size:1.08rem;letter-spacing:-.005em;margin:2px 0;}
+.rec-card .since{color:var(--muted);font-size:.82rem;margin-bottom:10px;font-variant-numeric:tabular-nums;}
 .rec-card .actions{display:flex;gap:8px;flex-wrap:wrap;}
-.rec-card .warn{color:var(--recent);font-size:.76rem;margin:6px 0;line-height:1.4;}
-.g1{border-color:var(--accent1)}
+.warn{display:flex;flex-direction:column;gap:6px;align-items:flex-start;color:var(--recent);background:color-mix(in srgb, var(--recent) 10%, transparent);border-radius:8px;padding:8px 10px;font-size:.76rem;margin:8px 0;line-height:1.45;}
+.warn .btn{border-color:color-mix(in srgb, var(--recent) 50%, var(--border));color:var(--recent);}
+.g1{border-color:color-mix(in srgb, var(--accent1) 45%, var(--border));background:color-mix(in srgb, var(--accent1) 5%, var(--card));}
 .g1 .badge{background:var(--accent1)}
-.g2{border-color:var(--accent2)}
+.g2{border-color:color-mix(in srgb, var(--accent2) 45%, var(--border));background:color-mix(in srgb, var(--accent2) 5%, var(--card));}
 .g2 .badge{background:var(--accent2)}
 
 button{font:inherit;cursor:pointer;}
-.btn{border:1px solid var(--border);background:var(--card);color:var(--text);border-radius:9px;padding:7px 12px;font-size:.82rem;}
+.btn{border:1px solid var(--border);background:var(--card);color:var(--text);border-radius:9px;padding:7px 12px;font-size:.82rem;font-weight:600;transition:border-color .12s,background .12s;}
 .btn:hover{border-color:var(--muted);}
+.btn:active{transform:translateY(0.5px);}
 .btn:disabled{opacity:.45;cursor:not-allowed;}
 .btn:disabled:hover{border-color:var(--border);}
 .btn.primary{background:var(--accent1);border-color:var(--accent1);color:#fff;}
-.btn.primary:hover{filter:brightness(1.05);}
-.btn.primary:disabled{background:var(--muted);border-color:var(--muted);}
+.btn.primary:hover{filter:brightness(1.08);}
+.btn.primary:disabled{background:var(--muted);border-color:var(--muted);filter:none;}
 .btn.ghost{background:transparent;}
 .btn.small{padding:4px 9px;font-size:.75rem;}
 .btn.danger{color:var(--recent);border-color:var(--recent);background:transparent;}
@@ -123,25 +129,28 @@ details.info-card > *:not(summary){margin-top:10px;}
 
 /* history table */
 table{width:100%;border-collapse:collapse;font-size:.82rem;}
-th,td{text-align:left;padding:7px 6px;border-bottom:1px solid var(--border);}
-th{color:var(--muted);font-weight:600;font-size:.72rem;text-transform:uppercase;letter-spacing:.03em;}
+th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--border);}
+th{color:var(--muted);font-weight:700;font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;}
+td:first-child{font-variant-numeric:tabular-nums;color:var(--muted);white-space:nowrap;}
 tr:last-child td{border-bottom:none;}
+tbody tr:hover td{background:var(--card-raised);}
 .type-pill{padding:2px 8px;border-radius:999px;font-size:.72rem;font-weight:600;white-space:nowrap;}
 .type-inj{background:color-mix(in srgb, var(--ok) 18%, transparent);color:var(--ok);}
 .type-skip{background:color-mix(in srgb, var(--muted) 20%, transparent);color:var(--muted);}
 .type-demo{background:color-mix(in srgb, var(--accent3) 20%, transparent);color:var(--accent3);margin-left:4px;}
-.empty{color:var(--muted);font-size:.85rem;padding:10px 0;text-align:center;}
+.empty{color:var(--muted);font-size:.85rem;padding:22px 10px;text-align:center;}
+.empty:before{content:"—";display:block;font-size:1rem;margin-bottom:4px;opacity:.5;}
 .actions-cell{display:flex;gap:6px;}
 .tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
 
 /* medication */
-.med-item{border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px;}
+.med-item{border:1px solid var(--border);background:var(--card-raised);border-radius:12px;padding:14px;margin-bottom:10px;}
 .med-item:last-child{margin-bottom:0;}
 .med-item .med-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
-.med-item .med-name{font-weight:600;font-size:.95rem;}
+.med-item .med-name{font-weight:700;font-size:1rem;letter-spacing:-.005em;}
 .med-item .med-meta{color:var(--muted);font-size:.78rem;margin-top:2px;}
-.med-item .med-status{font-size:.82rem;margin-top:8px;}
-.med-item .warn{color:var(--recent);font-size:.76rem;margin-top:4px;}
+.med-item .med-status{font-size:.82rem;margin-top:8px;color:var(--muted);font-variant-numeric:tabular-nums;}
+.med-item .warn{margin-top:8px;}
 .med-item .actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
 
 /* modal */
@@ -190,7 +199,9 @@ tr:last-child td{border-bottom:none;}
     <!-- LEFT: body map -->
     <div class="card body-card">
       <h2 style="align-self:flex-start;">Körperkarte</h2>
-      <svg id="bodyMap" viewBox="0 0 300 560"></svg>
+      <div class="body-canvas">
+        <svg id="bodyMap" viewBox="0 0 300 560"></svg>
+      </div>
       <div class="legend" id="legend"></div>
     </div>
 
@@ -803,8 +814,9 @@ function renderRecommendations(){
       const st = siteStatus(site.id);
       body += `<div class="site-name">${siteName(site.id)}</div><div class="since">${relDays(st.days)}</div>`;
       if(gate.blocked){
-        body += `<div class="warn">⚠ Mindestabstand von ${cfg.intervalDays} Tagen noch nicht erreicht. Zuletzt am ${formatDate(gate.lastTs)}, nächste Injektion frühestens am ${formatDate(gate.nextTs)}.
-          Falscher letzter Eintrag? <button type="button" class="btn small ghost" data-act="fix" style="padding:2px 7px;margin-left:4px;">Letzten Eintrag korrigieren</button>
+        body += `<div class="warn">
+          <span>⚠ Mindestabstand von ${cfg.intervalDays} Tagen noch nicht erreicht. Zuletzt am ${formatDate(gate.lastTs)}, nächste Injektion frühestens am ${formatDate(gate.nextTs)}.</span>
+          <button type="button" class="btn small ghost" data-act="fix">Falscher letzter Eintrag? Korrigieren</button>
         </div>`;
       }
       body += `<div class="actions">
@@ -1379,8 +1391,9 @@ function renderMedications(){
           </div>
         </div>
         ${statusText ? `<div class="med-status">${statusText}</div>` : ""}
-        ${gate.blocked ? `<div class="warn">⚠ Mindestabstand von ${med.intervalDays} Tagen noch nicht erreicht — nächste Einnahme frühestens am ${formatDate(gate.nextTs)}.
-          Falscher letzter Eintrag? <button type="button" class="btn small ghost" data-act="fix" style="padding:2px 7px;margin-left:4px;">Letzten Eintrag korrigieren</button>
+        ${gate.blocked ? `<div class="warn">
+          <span>⚠ Mindestabstand von ${med.intervalDays} Tagen noch nicht erreicht — nächste Einnahme frühestens am ${formatDate(gate.nextTs)}.</span>
+          <button type="button" class="btn small ghost" data-act="fix">Falscher letzter Eintrag? Korrigieren</button>
         </div>` : ""}
         <div class="actions">
           <button class="btn primary small" data-act="log" ${gate.blocked?"disabled":""}>Einnahme eintragen</button>
